@@ -24,8 +24,8 @@ foreach ($comments as $comment)
     <legend>
       Posté par <strong><?= htmlspecialchars($comment['auteur']) ?></strong> le <?= $comment['date']->format('d/m/Y à H\hi') ?>
       <?php if ($user->isAuthenticated()) { ?> -
-        <a href=<?= Direction::askRoute('Backend','News','updateComment',$comment['id']) ?>>Modifier</a> |
-        <a href=<?= Direction::askRoute('Backend','News','deleteComment',$comment['id']) ?>>Supprimer</a>
+        <a href=<?= Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])) ?>>Modifier</a> |
+        <a href=<?= Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])) ?>>Supprimer</a>
       <?php } ?>
     </legend>
     <p><?= nl2br($comment['contenu']) ?></p>

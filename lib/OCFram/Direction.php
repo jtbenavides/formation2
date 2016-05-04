@@ -2,7 +2,7 @@
 namespace OCFram;
 
 class Direction {
-    public static function askRoute($name,$module,$action,$id = 0){
+    public static function askRoute($name,$module,$action,$vars = []){
 
         if (empty($name) || empty($module) || empty($action) || !is_string($name) || !is_string($module) || !is_string($action)){
             return "/home";
@@ -16,7 +16,7 @@ class Direction {
         foreach ($routes as $route)
         {
             if ($route->getAttribute('module') === $module && $route->getAttribute('action') === $action) {
-                $url = $route->getAttribute('url');
+                $url = $route->getAttribute('uri');
                 break;
             }
         }
@@ -24,11 +24,10 @@ class Direction {
         if(is_null($url))
             return null;
 
-        if($id == 0) {
-            $url = str_replace('([0-9]+)\\', '', $url);
-        }else{
-            $url = str_replace('([0-9]+)\\', $id, $url);
+        foreach($vars as $key => $var){
+            $url = str_replace($key, $var, $url);
         }
+
 
         return $url;
     }
