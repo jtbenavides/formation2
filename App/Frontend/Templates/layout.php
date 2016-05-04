@@ -2,8 +2,10 @@
 <html>
   <head>
     <title>
-      <?= isset($title) ? $title : 'Mon super site' ?>
+      <?= isset($title) ? $title : 'Mon super site'?>
     </title>
+      
+      <?php use \OCFram\Direction; ?>
  
     <meta charset="utf-8" />
  
@@ -19,13 +21,13 @@
  
       <nav>
         <ul>
-            <li><a href="/home">Accueil</a></li>
+            <li><a href=<?= Direction::askRoute('Frontend','News','index') ?> >Accueil</a></li>
             <?php if ($user->isAuthenticated()) { ?>
-                <li><a href="/admin/">Admin</a></li>
-                <li><a href="/admin/news-insert.html">Ajouter une news</a></li>
-                <li><a href="/admin/logout">Deconnection</a></li>
+                <li><a href=<?= Direction::askRoute('Backend','News','index'); ?>>Admin</a></li>
+                <li><a href=<?= Direction::askRoute('Backend','News','insert'); ?>>Ajouter une news</a></li>
+                <li><a href=<?= Direction::askRoute('Backend','Connexion','logout'); ?>>Deconnection</a></li>
           <?php }else{ ?>
-                <li><a href="/admin/">Connection</a></li>
+                <li><a href=<?= Direction::askRoute('Backend','News','index'); ?>>Connection</a></li>
           <?php } ?>
 		  <?php require_once '../vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php'; ?>
 				<li><a href="http://mobiledetect.net/">Surf sur <?php $detect = new Mobile_Detect;

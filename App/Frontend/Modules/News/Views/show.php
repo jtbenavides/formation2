@@ -2,7 +2,8 @@
 <h2><?= $news['titre'] ?></h2>
 <p><?= nl2br($news['contenu']) ?></p>
 
-<?php if ($news['dateAjout'] != $news['dateModif']) { ?>
+<?php use \OCFram\Direction;
+if ($news['dateAjout'] != $news['dateModif']) { ?>
   <p style="text-align: right;"><small><em>Modifiée le <?= $news['dateModif']->format('d/m/Y à H\hi') ?></em></small></p>
 <?php } ?>
 
@@ -23,8 +24,8 @@ foreach ($comments as $comment)
     <legend>
       Posté par <strong><?= htmlspecialchars($comment['auteur']) ?></strong> le <?= $comment['date']->format('d/m/Y à H\hi') ?>
       <?php if ($user->isAuthenticated()) { ?> -
-        <a href="admin/comment-update-<?= $comment['id'] ?>.html">Modifier</a> |
-        <a href="admin/comment-delete-<?= $comment['id'] ?>.html">Supprimer</a>
+        <a href=<?= Direction::askRoute('Backend','News','updateComment',$comment['id']) ?>>Modifier</a> |
+        <a href=<?= Direction::askRoute('Backend','News','deleteComment',$comment['id']) ?>>Supprimer</a>
       <?php } ?>
     </legend>
     <p><?= nl2br($comment['contenu']) ?></p>
