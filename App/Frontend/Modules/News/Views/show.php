@@ -27,7 +27,7 @@ foreach ($comments as $comment)
         <a href="admin/comment-delete-<?= $comment['id'] ?>.html">Supprimer</a>
       <?php } ?>
     </legend>
-    <p><?= nl2br(htmlspecialchars($comment['contenu'])) ?></p>
+    <p><?= nl2br($comment['contenu']) ?></p>
   </fieldset>
   <?php
 }

@@ -35,7 +35,9 @@ class CommentsManagerPDO extends CommentsManager
  
     foreach ($comments as $comment)
     {
-      $comment->setDate(new \DateTime($comment->date()));
+        $comment->setDate(new \DateTime($comment->date(),new \DateTimeZone('Europe/Paris')));
+        $comment->setContenu(htmlspecialchars($comment->contenu()));
+        $comment->setAuteur(htmlspecialchars($comment->auteur()));
     }
  
     return $comments;
@@ -54,13 +56,16 @@ class CommentsManagerPDO extends CommentsManager
 
   public function get($id)
   {
-    $q = $this->dao->prepare('SELECT id, news, auteur, contenu FROM comments WHERE id = :id');
-    $q->bindValue(':id', (int) $id, \PDO::PARAM_INT);
-    $q->execute();
+      $q = $this->dao->prepare('SELECT id, news, auteur, contenu FROM comments WHERE id = :id');
+      $q->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+      $q->execute();
 
-    $q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');
+      $q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');
 
-    return $q->fetch();
+      $comment = $q->fetch();
+      $comment->setContenu(htmlspecialchars($comment->contenu()));
+      $comment->setAuteur(htmlspecialchars($comment->auteur()));
+    return $comment;
   }
 
   public function delete($id)

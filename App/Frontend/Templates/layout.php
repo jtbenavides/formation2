@@ -36,6 +36,7 @@
                         <?php } else{ ?>
                         PC.
                         <?php } ?>
+                        </a></li>
         </ul>
       </nav>
  

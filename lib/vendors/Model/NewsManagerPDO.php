@@ -55,8 +55,12 @@ class NewsManagerPDO extends NewsManager
 
         foreach ($listeNews as $news)
         {
-          $news->setDateAjout(new \DateTime($news->dateAjout()));
-          $news->setDateModif(new \DateTime($news->dateModif()));
+            $news->setDateAjout(new \DateTime($news->dateAjout(),new \DateTimeZone('Europe/Paris')));
+            $news->setDateModif(new \DateTime($news->dateModif(),new \DateTimeZone('Europe/Paris')));
+            $news->setContenu(htmlspecialchars($news->contenu()));
+            $news->setAuteur(htmlspecialchars($news->auteur()));
+            $news->setTitre(htmlspecialchars($news->titre()));
+
         }
 
         $requete->closeCursor();
@@ -74,8 +78,11 @@ class NewsManagerPDO extends NewsManager
 
         if ($news = $requete->fetch())
         {
-          $news->setDateAjout(new \DateTime($news->dateAjout()));
-          $news->setDateModif(new \DateTime($news->dateModif()));
+            $news->setDateAjout(new \DateTime($news->dateAjout(),new \DateTimeZone('Europe/Paris')));
+            $news->setDateModif(new \DateTime($news->dateModif(),new \DateTimeZone('Europe/Paris')));
+            $news->setContenu(htmlspecialchars($news->contenu()));
+            $news->setAuteur(htmlspecialchars($news->auteur()));
+            $news->setTitre(htmlspecialchars($news->titre()));
 
           return $news;
         }
