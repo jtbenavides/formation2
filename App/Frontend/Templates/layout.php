@@ -27,11 +27,15 @@
           <?php }else{ ?>
                 <li><a href="/admin/">Connection</a></li>
           <?php } ?>
-		  <?php require_once '../vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php';
-			$detect = new Mobile_Detect;
-			if (!$detect->isMobile() && !$detect->isTablet()){ ?>
-				<li><a href="/admin/">Connection</a></li>
-			<?php } ?>
+		  <?php require_once '../vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php'; ?>
+				<li><a href="http://mobiledetect.net/">Surf sur <?php $detect = new Mobile_Detect;
+                    if ($detect->isMobile()){ ?>
+                        mobile.
+                      <?php }else if ($detect->isTablet()){ ?>
+                        tablette.
+                        <?php } else{ ?>
+                        PC.
+                        <?php } ?>
         </ul>
       </nav>
  

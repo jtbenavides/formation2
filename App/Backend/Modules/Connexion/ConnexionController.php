@@ -1,6 +1,7 @@
 <?php
 namespace App\Backend\Modules\Connexion;
 
+use Entity\Member;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 
@@ -10,12 +11,23 @@ class ConnexionController extends BackController
     {
         $this->page->addVar('title', 'Connexion');
 
-        if ($request->postExists('login'))
-        {
+        if ($request->postExists('login')) {
             $login = $request->postData('login');
+            $manager = $this->managers->getManagerOf('Member');
             $password = $request->postData('password');
+            /*
+            $member = new Member(array(
+                'login' => $login,
+                'nickname' => $login,
+                'hash' => crypt(CRYPT_BLOWFISH,$password)
+            ));
 
-            if ($login == $this->app->config()->get('login') && $password == $this->app->config()->get('pass'))
+            $manager->insertMemberc($member);
+            */
+
+            $member = $manager->getMembercUsingLogin($login);
+
+            if ($member->hash() == crypt(CRYPT_BLOWFISH,$password))
             {
                 $this->app->user()->setAuthenticated(true);
                 $this->app->httpResponse()->redirect('.');
@@ -24,6 +36,7 @@ class ConnexionController extends BackController
             {
                 $this->app->user()->setFlash('Le pseudo ou le mot de passe est incorrect.');
             }
+            
         }
     }
 
@@ -33,9 +46,9 @@ class ConnexionController extends BackController
             
             $this->app->user()->setAuthenticated(false);
 
-            //session_unset();
-            //session_destroy();
-            //session_start();
+            session_unset();
+            session_destroy();
+            session_start();
 
             $this->app->httpResponse()->redirect('/home ');
 
