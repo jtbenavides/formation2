@@ -2,37 +2,47 @@
 namespace OCFram;
 
 class Direction {
+
+    public static $routesAppli = [];
+
+    public static $appliRoutes = [];
+
     public static function askRoute($name,$module,$action,$vars = []){
 
         if (empty($name) || empty($module) || empty($action) || !is_string($name) || !is_string($module) || !is_string($action)){
             return "/home";
         }
-        $xml = new \DOMDocument;
-        $xml->load('../App/'.$name.'/Config/routes.xml');
 
-        $routes = $xml->getElementsByTagName('route');
-        $routes = iterator_to_array($routes);
         $url = null;
+        $routes = null;
+        if(!array_key_exists($name,Direction::$appliRoutes)){
+            $xml = new \DOMDocument;
+            $xml->load('../App/'.$name.'/Config/routes.xml');
 
-        $routes = array_filter($routes,function($v) use($module,$action){
-            $v->getAttribute('module');
-            return ($v->getAttribute('module') === $module && $v->getAttribute('action') === $action);
-        });
+            $routes = $xml->getElementsByTagName('route');
+            $routes = iterator_to_array($routes);
 
-        $url = array_pop($routes)->getAttribute('uri');
+            $assocRoute = [];
+            foreach($routes as $route){
+                $assocRoute[$route->getAttribute('module').$route->getAttribute('action')] = $route->getAttribute('uri');
+            }
+            Direction::$appliRoutes[$name] = $assocRoute;
+        }
 
-        if(is_null($url))
+        if(!array_key_exists($module.$action,Direction::$appliRoutes[$name]))
             return "/home";
 
-        if(!is_null($vars)){
-            $keys = array_keys($vars);
-            array_walk($keys,function(&$v,$k){
-                $v = '['.$v.']';
-            });
+        $url = Direction::$appliRoutes[$name][$module.$action];
 
-            $url = str_replace($keys,$vars,$url);
+        if(!is_null($vars)){
+
+            foreach($vars as $key=>$var) {
+                $vars['['.$key.']'] = $var;
+                unset($vars[$key]);
+            }
+
+            $url = strtr($url,$vars);
         }
-        
         return $url;
     }
 }

@@ -7,7 +7,7 @@ if ($news['dateAjout'] != $news['dateModif']) { ?>
   <p style="text-align: right;"><small><em>Modifiée le <?= $news['dateModif']->format('d/m/Y à H\hi') ?></em></small></p>
 <?php } ?>
 
-<p><a href="commenter-<?= $news['id'] ?>.html">Ajouter un commentaire</a></p>
+<p><a href=<?= Direction::askRoute('Frontend','News','insertComment',array('news' =>$news['id'])) ?>>Ajouter un commentaire</a></p>
 
 <?php
 if (empty($comments))
@@ -34,4 +34,4 @@ foreach ($comments as $comment)
 }
 ?>
 
-<p><a href="commenter-<?= $news['id'] ?>.html">Ajouter un commentaire</a></p>
+<p><a href=<?= Direction::askRoute('Frontend','News','insertComment',array('news' =>$news['id'])) ?>>Ajouter un commentaire</a></p>

@@ -50,6 +50,7 @@ class NewsController extends BackController
   {
     $this->page->addVar('title', 'Ajout d\'un commentaire');
 
+    echo $request->getData('pseudo');
     if ($request->postExists('pseudo')) {
       $comment = new Comment([
           'news' => $request->getData('news'),
@@ -61,7 +62,9 @@ class NewsController extends BackController
         $this->managers->getManagerOf('Comments')->save($comment);
 
         $this->app->user()->setFlash('Le commentaire a bien été ajouté, merci !');
-
+        echo $request->getData('id');
+        echo $request->getData('pseudo');
+        echo 'test';
         $this->app->httpResponse()->redirect('news-' . $request->getData('news') . '.html');
       } else {
         $this->page->addVar('erreurs', $comment->erreurs());
