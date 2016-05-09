@@ -23,9 +23,9 @@ class BackendApplication extends Application
       $controller = new Modules\Connexion\ConnexionController($this, 'Connexion', 'index');
     }
 
-    $controller->execute();
-
-    $this->httpResponse->setPage($controller->page());
-    $this->httpResponse->send();
+    if($controller->execute()) {
+      $this->httpResponse->setPage($controller->page());
+      $this->httpResponse->send();
+    }
   }
 }

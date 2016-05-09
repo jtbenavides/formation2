@@ -3,10 +3,12 @@ namespace App\Frontend\Modules\News;
  
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
+use \OCFram\Direction;
 use \Entity\Comment;
  
 class NewsController extends BackController
 {
+    private static $state_form = 1;
   public function executeIndex(HTTPRequest $request)
   {
     $nombreNews = $this->app->config()->get('nombre_news');
@@ -31,6 +33,7 @@ class NewsController extends BackController
 
     // On ajoute la variable $listeNews à la vue.
     $this->page->addVar('listeNews', $listeNews);
+      return true;
   }
 
   public function executeShow(HTTPRequest $request)
@@ -44,33 +47,49 @@ class NewsController extends BackController
     $this->page->addVar('title', $news->titre());
     $this->page->addVar('news', $news);
     $this->page->addVar('comments', $this->managers->getManagerOf('Comments')->getListOf($news->id()));
+      return true;
   }
 
   public function executeInsertComment(HTTPRequest $request)
   {
-    $this->page->addVar('title', 'Ajout d\'un commentaire');
+      $response = [];
+      $response['success'] = true;
 
-    echo $request->getData('pseudo');
-    if ($request->postExists('pseudo')) {
-      $comment = new Comment([
-          'news' => $request->getData('news'),
-          'auteur' => $request->postData('pseudo'),
-          'contenu' => $request->postData('contenu')
-      ]);
+      if ($request->postExists('pseudo')) {
+          $comment = new Comment([
+            'news' => $request->getData('news'),
+            'auteur' => $request->postData('pseudo'),
+            'contenu' => $request->postData('contenu')
+          ]);
 
-      if ($comment->isValid()) {
-        $this->managers->getManagerOf('Comments')->save($comment);
-
-        $this->app->user()->setFlash('Le commentaire a bien été ajouté, merci !');
-        echo $request->getData('id');
-        echo $request->getData('pseudo');
-        echo 'test';
-        $this->app->httpResponse()->redirect('news-' . $request->getData('news') . '.html');
-      } else {
-        $this->page->addVar('erreurs', $comment->erreurs());
+          if (!$comment->isValid()) {
+              $response['success'] = false;
+              $response['errormessage'] = "Le commentaire n'est pas valide.";
+              echo json_encode($response);
+              return false;
+          }else if(!$this->managers->getManagerOf('Comments')->unique($comment)) {
+              $response['success'] = false;
+              $response['errormessage'] = "Ce commentaire existe deja.";
+              echo json_encode($response);
+              return false;
+          }else{
+                  $this->managers->getManagerOf('Comments')->save($comment);
+          }
+          $userAuth = $request->postData('user');
+          if ($userAuth) {
+              $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
+          }else{
+              $user = '';
+          }
+          
+          $response['contenu'] = '<fieldset><legend>Posté par <strong>'.htmlspecialchars($comment['auteur']).'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
+      }else{
+           $response['success'] = false;
+          $response['errormessage'] = "Il n'y a pas de pseudo ou de contenu.";
       }
 
-      $this->page->addVar('comment', $comment);
-    }
+      echo json_encode($response);
+
+      return false;
   }
 }

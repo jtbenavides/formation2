@@ -16,8 +16,21 @@ class CommentsManagerPDO extends CommentsManager
     $q->execute();
  
     $comment->setId($this->dao->lastInsertId());
+      $comment->setDate($this->get($comment['id'])->date());
   }
- 
+
+  public function unique(Comment $comment){
+      $q = $this->dao->prepare('SELECT * FROM comments WHERE news = :news AND auteur = :auteur AND contenu = :contenu AND TIMESTAMPDIFF(SECOND ,date,NOW()) < 2 ');
+
+      $q->bindValue(':news', $comment->news(), \PDO::PARAM_INT);
+      $q->bindValue(':auteur', $comment->auteur());
+      $q->bindValue(':contenu', $comment->contenu());
+
+      $q->execute();
+
+      return ($q->rowCount()== 0);
+  }
+
   public function getListOf($news)
   {
     if (!ctype_digit($news))
@@ -25,7 +38,7 @@ class CommentsManagerPDO extends CommentsManager
       throw new \InvalidArgumentException('L\'identifiant de la news passé doit être un nombre entier valide');
     }
  
-    $q = $this->dao->prepare('SELECT id, news, auteur, contenu, date FROM comments WHERE news = :news');
+    $q = $this->dao->prepare('SELECT id, news, auteur, contenu, date FROM comments WHERE news = :news ORDER BY date ASC');
     $q->bindValue(':news', $news, \PDO::PARAM_INT);
     $q->execute();
  
@@ -56,13 +69,14 @@ class CommentsManagerPDO extends CommentsManager
 
   public function get($id)
   {
-      $q = $this->dao->prepare('SELECT id, news, auteur, contenu FROM comments WHERE id = :id');
+      $q = $this->dao->prepare('SELECT id, news, auteur, contenu, date FROM comments WHERE id = :id');
       $q->bindValue(':id', (int) $id, \PDO::PARAM_INT);
       $q->execute();
 
       $q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');
 
       $comment = $q->fetch();
+      $comment->setDate(new \DateTime($comment->date(),new \DateTimeZone('Europe/Paris')));
       $comment->setContenu(htmlspecialchars($comment->contenu()));
       $comment->setAuteur(htmlspecialchars($comment->auteur()));
     return $comment;

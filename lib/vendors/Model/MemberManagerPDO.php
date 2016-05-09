@@ -7,7 +7,7 @@ class MemberManagerPDO extends MemberManager
 {
     public function getMembercUsingLogin($memberc_login)
     {
-        $requete = $this->dao->prepare('SELECT MMC_login AS id, MMC_nickname AS nickname, MMC_hash AS hash FROM t_mem_memberc WHERE MMC_login = :MMC_login');
+        $requete = $this->dao->prepare('SELECT MMC_id AS id, MMC_login AS login, MMC_nickname AS nickname,MMC_fk_MMY as status, MMC_hash AS hash FROM t_mem_memberc WHERE MMC_login = :MMC_login');
         $requete->bindValue(':MMC_login', (string) $memberc_login, \PDO::PARAM_STR);
         $requete->execute();
 

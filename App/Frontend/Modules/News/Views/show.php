@@ -7,8 +7,7 @@ if ($news['dateAjout'] != $news['dateModif']) { ?>
   <p style="text-align: right;"><small><em>Modifiée le <?= $news['dateModif']->format('d/m/Y à H\hi') ?></em></small></p>
 <?php } ?>
 
-<p><a href=<?= Direction::askRoute('Frontend','News','insertComment',array('news' =>$news['id'])) ?>>Ajouter un commentaire</a></p>
-
+<div id="content">
 <?php
 if (empty($comments))
 {
@@ -33,5 +32,17 @@ foreach ($comments as $comment)
   <?php
 }
 ?>
-
-<p><a href=<?= Direction::askRoute('Frontend','News','insertComment',array('news' =>$news['id'])) ?>>Ajouter un commentaire</a></p>
+</div>
+<form id="form" >
+    <label id="lpseudo">Pseudo : </label>
+    <input type="text" id="pseudo"><br />
+    <label id="lcontenu">Commentaire : </label>
+    <textarea id="contenu"></textarea>
+    <input type="hidden" id="news" value=<?= Direction::askRoute('Frontend','News','insertComment',array('news' =>$news['id'])) ?> />
+    <input type="submit" value="Envoyer" id="button_submit"/>
+</form>
+<center>
+<div id="display"></div>
+</center>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="/js/mon-script.js"></script>

@@ -19,7 +19,10 @@ class News extends Entity
   {
     return !(empty($this->auteur) || empty($this->titre) || empty($this->contenu));
   }
- 
+ /*
+<?= isset($erreurs) && in_array(\Entity\News::AUTEUR_INVALIDE, $erreurs) ? 'L\'auteur est invalide.<br />' : '' ?>
+        <label>Auteur</label>
+        <input type="text" name="auteur" value="<?= isset($news) ? $news['auteur'] : '' ?>" /><br />  */
  
   // SETTERS //
  

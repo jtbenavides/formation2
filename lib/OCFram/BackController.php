@@ -30,7 +30,7 @@ abstract class BackController extends ApplicationComponent
       throw new \RuntimeException('L\'action "'.$this->action.'" n\'est pas définie sur ce module');
     }
  
-    $this->$method($this->app->httpRequest());
+    return $this->$method($this->app->httpRequest());
   }
  
   public function page()

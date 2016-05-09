@@ -24,15 +24,15 @@ class Direction {
 
             $assocRoute = [];
             foreach($routes as $route){
-                $assocRoute[$route->getAttribute('module').$route->getAttribute('action')] = $route->getAttribute('uri');
+                $assocRoute[$route->getAttribute('module').'/'.$route->getAttribute('action')] = $route->getAttribute('uri');
             }
             Direction::$appliRoutes[$name] = $assocRoute;
         }
 
-        if(!array_key_exists($module.$action,Direction::$appliRoutes[$name]))
+        if(!array_key_exists($module.'/'.$action,Direction::$appliRoutes[$name]))
             return "/home";
 
-        $url = Direction::$appliRoutes[$name][$module.$action];
+        $url = Direction::$appliRoutes[$name][$module.'/'.$action];
 
         if(!is_null($vars)){
 

@@ -30,6 +30,8 @@ class ConnexionController extends BackController
             if ($member->hash() == crypt(CRYPT_BLOWFISH,$password))
             {
                 $this->app->user()->setAuthenticated(true);
+                $this->app->user()->setAttribute('user_id',$member['id']);
+                $this->app->user()->setAttribute('user_status',$member['status']);
                 $this->app->httpResponse()->redirect('.');
             }
             else
@@ -38,6 +40,7 @@ class ConnexionController extends BackController
             }
             
         }
+        return true;
     }
 
     public function executeLogout(HTTPRequest $request)
@@ -53,5 +56,6 @@ class ConnexionController extends BackController
             $this->app->httpResponse()->redirect('/home ');
 
         }
+        return true;
     }
 }
