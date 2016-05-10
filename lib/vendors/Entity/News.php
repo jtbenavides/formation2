@@ -6,6 +6,7 @@ use \OCFram\Entity;
 class News extends Entity
 {
   protected $auteur,
+            $auteurId,
             $titre,
             $contenu,
             $dateAjout,
@@ -14,10 +15,11 @@ class News extends Entity
   const AUTEUR_INVALIDE = 1;
   const TITRE_INVALIDE = 2;
   const CONTENU_INVALIDE = 3;
+    const AUTEURID_INVALIDE = 4;
  
   public function isValid()
   {
-    return !(empty($this->auteur) || empty($this->titre) || empty($this->contenu));
+    return !(empty($this->titre) || empty($this->contenu));
   }
  /*
 <?= isset($erreurs) && in_array(\Entity\News::AUTEUR_INVALIDE, $erreurs) ? 'L\'auteur est invalide.<br />' : '' ?>
@@ -34,6 +36,16 @@ class News extends Entity
     }
  
     $this->auteur = $auteur;
+  }
+
+  public function setAuteurId($auteurId)
+  {
+    if (empty($auteurId))
+    {
+      $this->erreurs[] = self::AUTEURID_INVALIDE;
+    }
+
+    $this->auteurId = intval($auteurId);
   }
  
   public function setTitre($titre)
@@ -71,6 +83,11 @@ class News extends Entity
   public function auteur()
   {
     return $this->auteur;
+  }
+
+  public function auteurId()
+  {
+    return $this->auteurId;
   }
  
   public function titre()

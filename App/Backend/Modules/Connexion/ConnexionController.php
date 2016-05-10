@@ -32,6 +32,7 @@ class ConnexionController extends BackController
                 $this->app->user()->setAuthenticated(true);
                 $this->app->user()->setAttribute('user_id',$member['id']);
                 $this->app->user()->setAttribute('user_status',$member['status']);
+                $this->app->user()->setAttribute('user_name',$member['nickname']);
                 $this->app->httpResponse()->redirect('.');
             }
             else

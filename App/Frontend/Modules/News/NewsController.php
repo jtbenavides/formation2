@@ -56,11 +56,14 @@ class NewsController extends BackController
       $response['success'] = true;
 
       if ($request->postExists('pseudo')) {
-          $comment = new Comment([
-            'news' => $request->getData('news'),
-            'auteur' => $request->postData('pseudo'),
-            'contenu' => $request->postData('contenu')
-          ]);
+          $data_comment = [
+              'news' => $request->getData('news'),
+              'auteur' => $request->postData('pseudo'),
+              'contenu' => $request->postData('contenu'),
+              'auteurId' => $request->postData('pseudoid')
+          ];
+
+          $comment = new Comment($data_comment);
 
           if (!$comment->isValid()) {
               $response['success'] = false;
@@ -75,8 +78,8 @@ class NewsController extends BackController
           }else{
                   $this->managers->getManagerOf('Comments')->save($comment);
           }
-          $userAuth = $request->postData('user');
-          if ($userAuth) {
+          
+          if ($this->app()->user()->isAuthenticated()) {
               $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
           }else{
               $user = '';

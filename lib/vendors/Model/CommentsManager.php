@@ -51,7 +51,7 @@ abstract class CommentsManager extends Manager
    * @param $id L'identifiant du commentaire
    * @return Comment
    */
-  abstract public function get($id);
+  abstract public function getUnique($id);
 
     /**
      * Méthode permettant de supprimer un commentaire.

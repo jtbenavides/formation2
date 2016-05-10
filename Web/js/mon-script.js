@@ -11,6 +11,7 @@ $(document).ready(function() {
             method: "POST",
             data: {
                 pseudo: $("#pseudo").val(),
+                pseudoid : $("#pseudoid").val(),
                 contenu: $("#contenu").val(),
                 user: user
             },

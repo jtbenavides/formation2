@@ -7,11 +7,13 @@ class Comment extends Entity
 {
   protected $news,
             $auteur,
+            $auteurId,
             $contenu,
             $date;
  
   const AUTEUR_INVALIDE = 1;
   const CONTENU_INVALIDE = 2;
+  const AUTEURID_INVALIDE = 3;
  
   public function isValid()
   {
@@ -31,6 +33,16 @@ class Comment extends Entity
     }
  
     $this->auteur = $auteur;
+  }
+
+  public function setAuteurId($auteurId)
+  {
+    if (empty($auteurId))
+    {
+      $this->erreurs[] = self::AUTEURID_INVALIDE;
+    }
+
+    $this->auteurId = (int) $auteurId;
   }
  
   public function setContenu($contenu)
@@ -56,6 +68,11 @@ class Comment extends Entity
   public function auteur()
   {
     return $this->auteur;
+  }
+
+  public function auteurId()
+  {
+    return $this->auteurId;
   }
  
   public function contenu()
