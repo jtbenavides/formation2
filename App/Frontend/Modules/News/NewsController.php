@@ -56,36 +56,45 @@ class NewsController extends BackController
       $response['success'] = true;
 
       if ($request->postExists('pseudo')) {
+
           $data_comment = [
               'news' => $request->getData('news'),
-              'auteur' => $request->postData('pseudo'),
-              'contenu' => $request->postData('contenu'),
-              'auteurId' => $request->postData('pseudoid')
+              'contenu' => $request->postData('contenu')
           ];
-
           $comment = new Comment($data_comment);
 
-          if (!$comment->isValid()) {
+          if($request->postData('pseudoid') == 0):
+              $comment->setPseudo($request->postData('pseudo'));
+          else:
+              $comment->setAuteur(new Member([
+                  'id' => $request->postData('pseudoid')
+              ]));
+          endif;
+
+
+          if (!$comment->isValid()):
               $response['success'] = false;
-              $response['errormessage'] = "Le commentaire n'est pas valide.";
-              echo json_encode($response);
-              return false;
-          }else if(!$this->managers->getManagerOf('Comments')->unique($comment)) {
+              $response['field'] = "commpentaire";
+              $response['form'] = "Le commentaire n'est pas valide.";
+          elseif($comment->pseudo() != null && $this->managers->getManagerOf('Member')->getMembercUsingNickname($comment->pseudo()) != null ):
               $response['success'] = false;
-              $response['errormessage'] = "Ce commentaire existe deja.";
-              echo json_encode($response);
-              return false;
-          }else{
-                  $this->managers->getManagerOf('Comments')->save($comment);
-          }
+              $response['field'] = "pseudo";
+              $response['form'] = "Ce pseudo est deja utilisé !";
+          else:
+              $this->managers->getManagerOf('Comments')->save($comment);
+              if($comment['pseudo'] == null):
+                  $pseudo = $comment->auteur()->nickname();
+                  $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
+              else:
+                  $pseudo = htmlspecialchars($comment['pseudo']);
+                  $user = '';
+              endif;
+
+              $response['contenu'] = '<fieldset><legend>Posté par <strong>'.$pseudo.'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
+          endif;
           
-          if ($this->app()->user()->isAuthenticated()) {
-              $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
-          }else{
-              $user = '';
-          }
-          
-          $response['contenu'] = '<fieldset><legend>Posté par <strong>'.htmlspecialchars($comment['auteur']).'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
+
+
       }else{
            $response['success'] = false;
           $response['errormessage'] = "Il n'y a pas de pseudo ou de contenu.";

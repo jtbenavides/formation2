@@ -17,6 +17,10 @@ $(document).ready(function() {
             },
             dataType: "json",
             success: function(data_a, deux, trois){
+                if($("#lpseudo").length != 0) {
+                    $("#lpseudo").html($("#lpseudo").html().substring(0, $("#lpseudo").html().indexOf(":") + 2));
+                }
+
                 $("#lcontenu").html($("#lcontenu").html().substring(0, $("#lcontenu").html().indexOf(":") + 2));
 
                 if (data_a.success) {
@@ -32,7 +36,8 @@ $(document).ready(function() {
                     });
 
                 } else {
-                    $("#lcontenu").append(data_a.errormessage.fontcolor("red"));
+                    var msg = data_a.form;
+                    $("label:contains("+capitalise(data_a.field)+")").append(msg.fontcolor("red"));
                 }
 
             },

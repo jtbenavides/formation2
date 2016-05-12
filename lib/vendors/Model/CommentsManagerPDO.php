@@ -2,66 +2,87 @@
 namespace Model;
  
 use \Entity\Comment;
+use \Entity\Member;
  
 class CommentsManagerPDO extends CommentsManager
 {
+
+    public function parseComment($tableau){
+        $Comment = new Comment([
+            'id' => $tableau['id'],
+            'news' => $tableau['news'],
+            'contenu' => htmlspecialchars($tableau['contenu']),
+            'date' => new \DateTime($tableau['date'],new \DateTimeZone('Europe/Paris')),
+        ]);
+
+        if($tableau['pseudo'] == null):
+            $Member = new Member([
+                'id' => $tableau['MMC_id'],
+                'nickname' => htmlspecialchars($tableau['MMC_nickname'])
+            ]);
+
+            $Comment->setAuteur($Member);
+        else:
+            $Comment->setPseudo(htmlspecialchars($tableau['pseudo']));
+        endif;
+
+        return $Comment;
+    }
+
   protected function add(Comment $comment)
   {
-      $q = $this->dao->prepare('INSERT INTO comments SET news = :news, auteur = :auteur, contenu = :contenu, auteurId = :auteurId, date = NOW()');
- 
+      $q = $this->dao->prepare('INSERT INTO comments SET news = :news, auteur = :auteur, contenu = :contenu, pseudo = :pseudo, date = NOW()');
+
       $q->bindValue(':news', $comment->news(), \PDO::PARAM_INT);
-      $q->bindValue(':auteurId', $comment->auteurId(), \PDO::PARAM_INT);
-      $q->bindValue(':auteur', $comment->auteur());
+      if($comment->pseudo() == null):
+          $q->bindValue(':auteur', $comment->auteur()->id(), \PDO::PARAM_INT);
+          $q->bindValue(':pseudo', null);
+      else:
+          $q->bindValue(':auteur', 0, \PDO::PARAM_INT);
+          $q->bindValue(':pseudo', $comment->pseudo());
+      endif;
       $q->bindValue(':contenu', $comment->contenu());
- 
+
       $q->execute();
- 
+
       $comment->setId($this->dao->lastInsertId());
       $comment->setDate($this->getUnique($comment['id'])->date());
   }
 
-  public function unique(Comment $comment){
-      $q = $this->dao->prepare('SELECT * FROM comments WHERE news = :news AND auteur = :auteur AND contenu = :contenu AND TIMESTAMPDIFF(SECOND ,date,NOW()) < 2 ');
-
-      $q->bindValue(':news', $comment->news(), \PDO::PARAM_INT);
-      $q->bindValue(':auteur', $comment->auteur());
-      $q->bindValue(':contenu', $comment->contenu());
-
-      $q->execute();
-
-      return ($q->rowCount()== 0);
-  }
-
   public function getListOf($news)
   {
-    if (!ctype_digit($news))
-    {
+
+    if (!ctype_digit($news) && !is_int($news)):
       throw new \InvalidArgumentException('L\'identifiant de la news passé doit être un nombre entier valide');
-    }
- 
-    $q = $this->dao->prepare('SELECT id, news, auteur, contenu, auteurId, date FROM comments WHERE news = :news ORDER BY date ASC');
+    endif;
+
+    $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE news = :news ORDER BY date ASC');
     $q->bindValue(':news', $news, \PDO::PARAM_INT);
     $q->execute();
- 
-    $q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');
- 
-    $comments = $q->fetchAll();
- 
-    foreach ($comments as $comment)
+
+    $listTableau = $q->fetchAll();
+
+    $listComment = [];
+
+    foreach ($listTableau as $tableau)
     {
-        $comment->setDate(new \DateTime($comment->date(),new \DateTimeZone('Europe/Paris')));
-        $comment->setContenu(htmlspecialchars($comment->contenu()));
-        $comment->setAuteur(htmlspecialchars($comment->auteur()));
+        $Comment = $this->parseComment($tableau);
+
+        $listComment[] = $Comment;
     }
- 
-    return $comments;
+
+    return $listComment;
   }
 
   protected function modify(Comment $comment)
   {
-    $q = $this->dao->prepare('UPDATE comments SET auteur = :auteur, contenu = :contenu WHERE id = :id');
+    $q = $this->dao->prepare('UPDATE comments SET pseudo = :pseudo, contenu = :contenu WHERE id = :id');
 
-    $q->bindValue(':auteur', $comment->auteur());
+      if($comment->pseudo() == null):
+          $q->bindValue(':pseudo', null);
+      else:
+          $q->bindValue(':pseudo', $comment->pseudo());
+      endif;
     $q->bindValue(':contenu', $comment->contenu());
     $q->bindValue(':id', $comment->id(), \PDO::PARAM_INT);
 
@@ -70,19 +91,15 @@ class CommentsManagerPDO extends CommentsManager
 
   public function getUnique($id)
   {
-      $q = $this->dao->prepare('SELECT id, news, auteur, auteurId, contenu, date FROM comments WHERE id = :id');
+      $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE id = :id');
       $q->bindValue(':id', (int) $id, \PDO::PARAM_INT);
       $q->execute();
 
-      $q->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Comment');
+      if($tableau = $q->fetch()):
+          return $this->parseComment($tableau);
+      endif;
 
-      $comment = $q->fetch();
-      $comment->setDate(new \DateTime($comment->date(),new \DateTimeZone('Europe/Paris')));
-      $comment->setContenu(htmlspecialchars($comment->contenu()));
-      $comment->setAuteur(htmlspecialchars($comment->auteur()));
-      $comment->setAuteurId($comment->auteurId());
-      $comment->setNews($comment->news());
-    return $comment;
+      return null;
   }
 
   public function delete($id)

@@ -20,6 +20,21 @@ class MemberManagerPDO extends MemberManager
         return null;
     }
 
+    public function getMembercUsingNickname($memberc_nickname)
+    {
+        $requete = $this->dao->prepare('SELECT MMC_id AS id, MMC_login AS login, MMC_nickname AS nickname,MMC_fk_MMY as status, MMC_hash AS hash FROM t_mem_memberc WHERE MMC_nickname = :MMC_nickname');
+        $requete->bindValue(':MMC_nickname', (string) $memberc_nickname, \PDO::PARAM_STR);
+        $requete->execute();
+
+        $requete->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Member');
+
+        if ($member = $requete->fetch()) {
+            return $member;
+        }
+
+        return null;
+    }
+
     public function add(Member $member)
     {
 
@@ -32,6 +47,8 @@ class MemberManagerPDO extends MemberManager
         $q->bindValue(':hash', $member->hash());
 
         $q->execute();
+
+        $member->setId($this->dao->lastInsertId());
 
     }
 }

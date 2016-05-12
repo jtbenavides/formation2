@@ -47,12 +47,21 @@ class ConnectionController extends BackController
                 $response['success'] = false;
                 $response['field'] = "login";
                 $response['form'] = "Ce login est deja utilisé !";
-            }else {
+            }elseif($this->managers->getManagerOf('Member')->getMembercUsingNickname($Member->nickname()) != null ){
+            $response['success'] = false;
+            $response['field'] = "pseudo";
+            $response['form'] = "Ce pseudo est deja utilisé !";
+            }else{
                 $response['success'] = true;
                 $Member->setStatus(2);
                 $Member->setHash(crypt(CRYPT_BLOWFISH,$Member->password1()));
                 $this->managers->getManagerOf('Member')->save($Member);
                 $this->app->user()->setFlash('Votre compte a bien été crée !');
+
+                $this->app->user()->setAuthenticated(true);
+                $this->app->user()->setAttribute('user_id',$Member->id());
+                $this->app->user()->setAttribute('user_status',$Member->status());
+                $this->app->user()->setAttribute('user_name',$Member->nickname());
             }
 
             $this->page->addVar('json',$response);

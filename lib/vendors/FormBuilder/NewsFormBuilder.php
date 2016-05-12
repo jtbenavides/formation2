@@ -28,6 +28,11 @@ class NewsFormBuilder extends FormBuilder
                 'validators' => [
                     new NotNullValidator('Merci de spécifier le contenu de la news'),
                 ],
+            ]))
+            ->add(new StringField([
+                'label' => 'Tags',
+                'name' => 'tags',
+                'validators' => []
             ]));
     }
 }

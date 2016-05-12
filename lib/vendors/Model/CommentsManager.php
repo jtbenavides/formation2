@@ -29,8 +29,6 @@ abstract class CommentsManager extends Manager
       throw new \RuntimeException('Le commentaire doit être validé pour être enregistré');
     }
   }
-  
-  abstract public function unique(Comment $comment);
  
   /**
    * Méthode permettant de récupérer une liste de commentaires.

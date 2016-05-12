@@ -7,42 +7,42 @@ class Comment extends Entity
 {
   protected $news,
             $auteur,
-            $auteurId,
+            $pseudo,
             $contenu,
             $date;
  
   const AUTEUR_INVALIDE = 1;
   const CONTENU_INVALIDE = 2;
-  const AUTEURID_INVALIDE = 3;
+  const PSEUDO_INVALIDE = 3;
  
   public function isValid()
   {
-    return !(empty($this->auteur) || empty($this->contenu));
+    return !(!(empty($this->auteur) || empty($this->pseudo)) || empty($this->contenu));
   }
  
   public function setNews($news)
   {
     $this->news = (int) $news;
   }
- 
+
   public function setAuteur($auteur)
   {
-    if (!is_string($auteur) || empty($auteur))
+    if (!($auteur instanceof Member) || empty($auteur))
     {
       $this->erreurs[] = self::AUTEUR_INVALIDE;
     }
- 
+
     $this->auteur = $auteur;
   }
 
-  public function setAuteurId($auteurId)
+  public function setPseudo($pseudo)
   {
-    if (empty($auteurId))
+    if (!is_string($pseudo) || empty($pseudo))
     {
-      $this->erreurs[] = self::AUTEURID_INVALIDE;
+      $this->erreurs[] = self::PSEUDO_INVALIDE;
     }
 
-    $this->auteurId = (int) $auteurId;
+    $this->pseudo = $pseudo;
   }
  
   public function setContenu($contenu)
@@ -70,9 +70,9 @@ class Comment extends Entity
     return $this->auteur;
   }
 
-  public function auteurId()
+  public function pseudo()
   {
-    return $this->auteurId;
+    return $this->pseudo;
   }
  
   public function contenu()
