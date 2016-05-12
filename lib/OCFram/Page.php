@@ -27,6 +27,10 @@ class Page extends ApplicationComponent
     $name = $this->app->name();
  
     extract($this->vars);
+
+    if(isset($json)){
+        return json_encode($json);
+    }
  
     ob_start();
       require $this->contentFile;

@@ -8,7 +8,7 @@ use \Entity\Comment;
  
 class NewsController extends BackController
 {
-    private static $state_form = 1;
+    
   public function executeIndex(HTTPRequest $request)
   {
     $nombreNews = $this->app->config()->get('nombre_news');
@@ -91,8 +91,8 @@ class NewsController extends BackController
           $response['errormessage'] = "Il n'y a pas de pseudo ou de contenu.";
       }
 
-      echo json_encode($response);
+      $this->page->addVar('json',$response);
 
-      return false;
+      return true;
   }
 }

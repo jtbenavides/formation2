@@ -15,15 +15,6 @@ class ConnexionController extends BackController
             $login = $request->postData('login');
             $manager = $this->managers->getManagerOf('Member');
             $password = $request->postData('password');
-            /*
-            $member = new Member(array(
-                'login' => $login,
-                'nickname' => $login,
-                'hash' => crypt(CRYPT_BLOWFISH,$password)
-            ));
-
-            $manager->insertMemberc($member);
-            */
 
             $member = $manager->getMembercUsingLogin($login);
 

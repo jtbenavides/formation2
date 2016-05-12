@@ -1,7 +1,7 @@
 <?php
 namespace OCFram;
 
-abstract class Field
+abstract class Field 
 {
     use Hydrator;
 

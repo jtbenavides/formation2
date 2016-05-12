@@ -28,6 +28,7 @@
                 <li><a href=<?= Direction::askRoute('Backend','Connexion','logout'); ?>>Deconnection</a></li>
           <?php }else{ ?>
                 <li><a href=<?= Direction::askRoute('Backend','News','index'); ?>>Connection</a></li>
+                <li><a href=<?= Direction::askRoute('Frontend','Connection','signin'); ?>>Inscription</a></li>
           <?php } ?>
 		  <?php require_once '../vendor/mobiledetect/mobiledetectlib/Mobile_Detect.php'; ?>
 				<li><a href="http://mobiledetect.net/">Surf sur <?php $detect = new Mobile_Detect;
@@ -54,3 +55,5 @@
     </div>
   </body>
 </html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="/js/mon-script.js"></script>

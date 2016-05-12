@@ -49,6 +49,16 @@ class Form
         return $valid;
     }
 
+    public function error(){
+        foreach ($this->fields as $field)
+        {
+            if (!$field->isValid())
+            {
+                return $field->label();
+            }
+        }
+    }
+
     public function entity()
     {
         return $this->entity;

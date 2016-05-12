@@ -20,13 +20,15 @@ class MemberManagerPDO extends MemberManager
         return null;
     }
 
-    public function insertMemberc(Member $member)
+    public function add(Member $member)
     {
 
-        $q = $this->dao->prepare('INSERT INTO T_MEM_memberc SET MMC_login = :login, MMC_nickname = :nickname, MMC_hash = :hash');
+        $q = $this->dao->prepare('INSERT INTO T_MEM_memberc SET MMC_login = :login, MMC_nickname = :nickname, MMC_hash = :hash, MMC_email = :email, MMC_fk_MMY = :status');
 
         $q->bindValue(':login', $member->login(), \PDO::PARAM_INT);
+        $q->bindValue(':status', $member->status(), \PDO::PARAM_INT);
         $q->bindValue(':nickname', $member->nickname());
+        $q->bindValue(':email', $member->email());
         $q->bindValue(':hash', $member->hash());
 
         $q->execute();
