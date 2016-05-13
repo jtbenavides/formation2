@@ -29,6 +29,11 @@ abstract class CommentsManager extends Manager
       throw new \RuntimeException('Le commentaire doit être validé pour être enregistré');
     }
   }
+
+  abstract public function getListBy($auteurid);
+
+
+  abstract public function getCommentBefore($newsid,$commentid);
  
   /**
    * Méthode permettant de récupérer une liste de commentaires.

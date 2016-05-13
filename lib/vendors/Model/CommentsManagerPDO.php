@@ -102,7 +102,59 @@ class CommentsManagerPDO extends CommentsManager
       return null;
   }
 
-  public function delete($id)
+    public function getListBy($auteurid)
+    {
+        if (!ctype_digit($auteurid) && !is_int($auteurid)):
+            throw new \InvalidArgumentException('L\'identifiant de l\'utilisateur passé doit être un nombre entier valide');
+        endif;
+
+        $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE auteur = :auteur ORDER BY date');
+        $q->bindValue(':auteur', $auteurid, \PDO::PARAM_INT);
+        $q->execute();
+
+        $listTableau = $q->fetchAll();
+
+        $listComment = [];
+
+        foreach ($listTableau as $tableau)
+        {
+            $Comment = $this->parseComment($tableau);
+
+            $listComment[] = $Comment;
+        }
+
+        return $listComment;
+    }
+
+    public function getCommentBefore($newsid, $commentid)
+    {
+        $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE id < :id AND news = :news ORDER BY id DESC LIMIT 1');
+        $q->bindValue(':id', $commentid, \PDO::PARAM_INT);
+        $q->bindValue(':news', $newsid, \PDO::PARAM_INT);
+        $q->execute();
+
+        if($tableau = $q->fetch()):
+            return $this->parseComment($tableau);
+        endif;
+
+        return null;
+    }
+
+    public function getCommentAfter($newsid, $commentid)
+    {
+        $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE id > :id AND news = :news ORDER BY id DESC LIMIT 1');
+        $q->bindValue(':id', $commentid, \PDO::PARAM_INT);
+        $q->bindValue(':news', $newsid, \PDO::PARAM_INT);
+        $q->execute();
+
+        if($tableau = $q->fetch()):
+            return $this->parseComment($tableau);
+        endif;
+
+        return null;
+    }
+
+    public function delete($id)
   {
     $this->dao->exec('DELETE FROM comments WHERE id = '.(int) $id);
   }

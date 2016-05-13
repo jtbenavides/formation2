@@ -5,4 +5,7 @@
   <route url="/commenter-([0-9]+)\.html" uri="/commenter-[news].html" module="News" action="insertComment" vars="news" />
   <route url="/signin" uri="/signin" module="Connection" action="signin" />
   <route url="/insertAuthor" uri="/insertAuthor" module="Connection" action="insertAuthor" />
+  <route url="/user-([0-9]+)\.html" uri="/user-[id].html" module="News" action="user" vars="id"/>
+  <route url="/([0-9]+)-before-([0-9]+)\.html" uri="/[news]-before-[id].html" module="News" action="before" vars="news,id"/>
+  <route url="/([0-9]+)-after-([0-9]+)\.html" uri="/[news]-after-[id].html" module="News" action="after" vars="news,id"/>
 </routes>

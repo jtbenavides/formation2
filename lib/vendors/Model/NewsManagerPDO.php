@@ -52,6 +52,54 @@ class NewsManagerPDO extends NewsManager
         return $listeNews;
     }
 
+    public function getListCreatBy($auteurid)
+    {
+        $requete = $this->dao->prepare('SELECT id, MMC_id, MMC_nickname, titre, contenu, dateAjout, dateModif FROM news INNER JOIN T_MEM_memberc ON MMC_id = auteur WHERE auteur = :auteur ORDER BY dateAjout ');
+
+        $requete->bindValue(':auteur', $auteurid);
+        $requete->execute();
+
+        $listeTableau = $requete->fetchAll();
+
+        $listeNews = [];
+
+        foreach ($listeTableau as $tableau)
+        {
+            $News = $this->parseNews($tableau);
+            $News->setDateModif();
+
+            $listeNews[] = $News;
+        }
+
+        $requete->closeCursor();
+
+        return $listeNews;
+    }
+
+    public function getListModifBy($auteurid)
+    {
+        $requete = $this->dao->prepare('SELECT id, MMC_id, MMC_nickname, titre, contenu, dateAjout, dateModif FROM news INNER JOIN T_MEM_memberc ON MMC_id = auteur WHERE auteur = :auteur AND dateAjout != dateModif ORDER BY dateModif ');
+
+        $requete->bindValue(':auteur', $auteurid);
+        $requete->execute();
+
+        $listeTableau = $requete->fetchAll();
+
+        $listeNews = [];
+
+        foreach ($listeTableau as $tableau)
+        {
+            $News = $this->parseNews($tableau);
+            $News->setDateAjout();
+
+            $listeNews[] = $News;
+        }
+
+        $requete->closeCursor();
+
+        return $listeNews;
+    }
+
     protected function add(News $news)
     {
         $requete = $this->dao->prepare('INSERT INTO news SET auteur = :auteur, titre = :titre, contenu = :contenu, dateAjout = NOW(), dateModif = NOW()');

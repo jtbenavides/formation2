@@ -49,6 +49,10 @@ abstract class NewsManager extends Manager
         }
     }
 
+    abstract public function getListModifBy($auteurid);
+
+    abstract public function getListCreatBy($auteurid);
+
   /**
    * Méthode renvoyant le nombre de news total.
    * @return int

@@ -68,12 +68,12 @@ class News extends Entity
     $this->tags = $tags;
   }
 
-  public function setDateAjout(\DateTime $dateAjout)
+  public function setDateAjout(\DateTime $dateAjout = null)
   {
     $this->dateAjout = $dateAjout;
   }
  
-  public function setDateModif(\DateTime $dateModif)
+  public function setDateModif(\DateTime $dateModif = null)
   {
     $this->dateModif = $dateModif;
   }

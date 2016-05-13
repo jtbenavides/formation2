@@ -124,6 +124,50 @@ $(document).ready(function() {
     });
 });
 
+$('a[href*="before"]').click(function(event){
+    var addressValue = $(this).attr("href");
+    var t = 'a[href="'+addressValue+'"]';
+    $.ajax({
+        url: addressValue,
+        method: "POST",
+        dataType: "json",
+        success: function(data_a){
+            if(data_a.success == true) {
+                $(t).after(data_a.contenu);
+                $(t).attr("href", data_a.link);
+            }else{
+                $(t).html("");
+            }
+        },
+        error : function(u,d,t){
+            alert(u+' '+d+' '+t);
+        }
+    });
+    return false;
+});
+
+$('a[href*="after"]').click(function(event){
+    var addressValue = $(this).attr("href");
+    var t = 'a[href="'+addressValue+'"]';
+    $.ajax({
+        url: addressValue,
+        method: "POST",
+        dataType: "json",
+        success: function(data_a){
+            if(data_a.success == true) {
+                $(t).before(data_a.contenu);
+                $(t).attr("href", data_a.link);
+            }else{
+                $(t).html("");
+            }
+        },
+        error : function(u,d,t){
+            alert(u+' '+d+' '+t);
+        }
+    });
+    return false;
+});
+
 function checkNotNull(value){
     return value != '';
 }

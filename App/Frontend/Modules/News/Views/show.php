@@ -1,8 +1,10 @@
-<p>Par <em><?= $news['auteur']->nickname() ?></em>, le <?= $news['dateAjout']->format('d/m/Y à H\hi') ?></p>
+<?php use \OCFram\Direction; ?>
+
+<p>Par <em><a href=<?= Direction::askRoute('Frontend','News','user',['id' => $news['auteur']->id()])?> ><?= $news['auteur']->nickname() ?></a></em>, le <?= $news['dateAjout']->format('d/m/Y à H\hi') ?></p>
 <h2><?= $news['titre'] ?></h2>
 <p><?= nl2br($news['contenu']) ?></p>
 
-<?php use \OCFram\Direction;
+<?php
 if ($news['dateAjout'] != $news['dateModif']) { ?>
   <p style="text-align: right;"><small><em>Modifiée le <?= $news['dateModif']->format('d/m/Y à H\hi') ?></em></small></p>
 <?php } ?>
@@ -21,8 +23,10 @@ foreach ($comments as $comment)
   ?>
   <fieldset>
     <legend>
-      Posté par <strong><?php   if($comment['pseudo'] == null): ?>
+      Posté par <strong><?php if($comment['auteur'] != null): ?>
+            <a href=<?= Direction::askRoute('Frontend','News','user',['id' => $comment['auteur']->id()])?>>
                                     <?= $comment['auteur']->nickname() ?>
+            </a>
                                 <?php else: ?>
                                     <?= $comment['pseudo'] ?>
                                 <?php endif;?>

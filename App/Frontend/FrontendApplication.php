@@ -16,9 +16,9 @@ class FrontendApplication extends Application
   {
     $controller = $this->getController();
 
-    if($controller->execute()) {
-      $this->httpResponse->setPage($controller->page());
-      $this->httpResponse->send();
-    }
+    $controller->execute();
+    $this->httpResponse->setPage($controller->page());
+    $this->httpResponse->send();
+
   }
 }

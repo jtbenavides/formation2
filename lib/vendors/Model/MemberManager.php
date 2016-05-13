@@ -7,6 +7,10 @@ use \Entity\Member;
 abstract class MemberManager extends Manager{
     abstract public function getMembercUsingLogin($memberc_login);
 
+    abstract public function getMembercUsingNickname($memberc_nickname);
+
+    abstract public function getMembercUsingId($memberc_id);
+    
     abstract public function add(Member $Member);
 
     public function save(Member $Member)
