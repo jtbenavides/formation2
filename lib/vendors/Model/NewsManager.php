@@ -14,7 +14,19 @@ abstract class NewsManager extends Manager
      */
     abstract public function delete($id);
 
+    abstract public function existTagcByDescription($description);
+
+    abstract public function insertTagc($description);
+
+    abstract public function getTagcUsingNews($newsid);
+
     abstract public function getListByAuteurId($auteurId);
+
+    abstract public function getListByTag($tag);
+    
+    abstract public function getTagcUsingStartDescription($startdescription, $limit);
+
+    abstract public function insertTagd($newsid,$description);
 
     /**
      * Méthode permettant de modifier une news.

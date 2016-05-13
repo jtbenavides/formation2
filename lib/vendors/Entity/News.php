@@ -60,11 +60,6 @@ class News extends Entity
 
   public function setTags($tags)
   {
-    if (!is_string($tags) || empty($tags))
-    {
-      $this->erreurs[] = self::TAGS_INVALIDE;
-    }
-
     $this->tags = $tags;
   }
 

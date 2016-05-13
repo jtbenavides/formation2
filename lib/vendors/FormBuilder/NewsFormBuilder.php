@@ -3,6 +3,7 @@ namespace FormBuilder;
 
 use \OCFram\FormBuilder;
 use \OCFram\StringField;
+use OCFram\TagValidator;
 use \OCFram\TextField;
 use \OCFram\MaxLengthValidator;
 use \OCFram\NotNullValidator;
@@ -32,7 +33,8 @@ class NewsFormBuilder extends FormBuilder
             ->add(new StringField([
                 'label' => 'Tags',
                 'name' => 'tags',
-                'validators' => []
+                'validators' => [
+                ]
             ]));
     }
 }

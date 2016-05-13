@@ -25,21 +25,7 @@ class PasswordField extends Field
         {
             $widget .= ' maxlength="'.$this->maxLength.'"';
         }
-/*
-        $widget .= ' />';
 
-        $widget .= '<label>Confirmation de '.$this->label.'</label><input type="password" name="'.$this->name.'2"';
-
-        if (!empty($this->value))
-        {
-            $widget .= ' value="'.htmlspecialchars($this->value).'"';
-        }
-
-        if (!empty($this->maxLength))
-        {
-            $widget .= ' maxlength="'.$this->maxLength.'"';
-        }
-*/
         return $widget .= ' />';
     }
 

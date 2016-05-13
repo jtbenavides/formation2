@@ -23,7 +23,7 @@ class NewsController extends BackController
     $nombreCaracteres = $this->app->config()->get('nombre_caracteres');
 
     // On ajoute une définition pour le titre.
-    $this->page->addVar('title', 'Liste des ' . $nombreNews . ' dernières news');
+    $this->page->addVar('title', 'Liste des ' . $nombreNews . ' dernières news '.$nombreCaracteres);
 
     // On récupère le manager des news.
     $manager = $this->managers->getManagerOf('News');
@@ -104,7 +104,7 @@ class NewsController extends BackController
               endif;
 
               $response['contenu'] = '<fieldset><legend>Posté par <strong>'.$pseudo.'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
-              
+
           endif;
 
       }else{
@@ -204,6 +204,46 @@ class NewsController extends BackController
         }
         $this->page->addVar('json',$response);
     }
+
+  public function executeTag(HTTPRequest $request){
+      $hashtag = $request->getData('tag');
+      $this->page->addVar('hashtag',"#".$hashtag);
+      $this->page->addVar('title', 'Liste des news avec #'.$hashtag);
+      
+      $nombreCaracteres = $this->app->config()->get('nombre_caracteres');
+
+      $listeNews = $this->managers->getManagerOf('News')->getListByTag($hashtag);
+
+      foreach ($listeNews as $news):
+          if (strlen($news->contenu()) > $nombreCaracteres):
+              $debut = substr($news->contenu(), 0, $nombreCaracteres);
+              $debut = substr($debut, 0, strrpos($debut, ' ')) . '...';
+
+              $news->setContenu($debut);
+          endif;
+      endforeach;
+
+      $this->page->addVar('listeNews', $listeNews);
+
+  }
+
+  public function executeStarting(HTTPRequest $request){
+      $tag = $request->getData('tag');
+      $limit = $request->getData('lim');
+
+      $listeTag = $this->managers->getManagerOf('News')->getTagcUsingStartDescription($tag,$limit);
+
+      $response = [];
+      if(empty($listeTag)):
+          $response['success'] = false;
+          $response['error'] = "Pas de tag";
+      else:
+          $response['success'] = true;
+          $response['contenu'] = $listeTag;
+
+      endif;
+      $this->page->addVar('json',$response);
+  }
 
 
 }

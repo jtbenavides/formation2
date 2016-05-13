@@ -8,4 +8,6 @@
   <route url="/user-([0-9]+)\.html" uri="/user-[id].html" module="News" action="user" vars="id"/>
   <route url="/([0-9]+)-before-([0-9]+)\.html" uri="/[news]-before-[id].html" module="News" action="before" vars="news,id"/>
   <route url="/([0-9]+)-after-([0-9]+)\.html" uri="/[news]-after-[id].html" module="News" action="after" vars="news,id"/>
+  <route url="/tag-([a-zA-Z0-9]+)\.html" uri="/tag-[tag].html" module="News" action="tag" vars="tag"/>
+  <route url="/starting-([a-zA-Z0-9]+)-limit-([0-9]+)\.html" uri="/starting-[tag]-limit-[lim].html" module="News" action="starting" vars="tag,lim" />
 </routes>

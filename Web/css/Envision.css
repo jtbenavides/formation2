@@ -415,3 +415,6 @@ footer a {
 
 .middle { vertical-align: middle; }
 
+.select_focus{
+	background-color: aliceblue;
+}

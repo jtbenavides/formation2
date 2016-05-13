@@ -5,9 +5,21 @@
 <p><?= nl2br($news['contenu']) ?></p>
 
 <?php
-if ($news['dateAjout'] != $news['dateModif']) { ?>
+if ($news['dateAjout'] != $news['dateModif']): ?>
   <p style="text-align: right;"><small><em>Modifiée le <?= $news['dateModif']->format('d/m/Y à H\hi') ?></em></small></p>
-<?php } ?>
+<?php endif;
+
+if(!empty($news['tags'])):
+    $strtag = "";
+    $tags = explode(" ",$news['tags']);
+
+    foreach($tags as $tag):
+        $strtag .="<a href=".Direction::askRoute('Frontend','News','tag',['tag' => substr($tag,1)]).">".$tag."</a> ";
+    endforeach; ?>
+    <?= $strtag ?>
+<?php endif; ?>
+
+
 
 <div id="content">
 <?php

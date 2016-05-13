@@ -1,3 +1,7 @@
+var selectedElement = -1;
+var lastValue = "";
+var child = 0;
+
 $(document).ready(function() {
     // bind 'myForm' and provide a simple callback function
     $("#clock").hide();
@@ -122,6 +126,85 @@ $(document).ready(function() {
         
         return false;
     });
+
+    $("[name='tags']").bind('keyup',function(event) {
+        child = $("#results")[0].childNodes;
+
+        var tags = $("[name='tags']").val();
+        var hashs = tags.split(" ");
+        if (hashs[hashs.length - 1].length == 0) return;
+        var tag = hashs[hashs.length - 1];
+        if (tag.substring(0, 1) != "#" || tag.length == 1) return;
+        tag = tag.substring(1);
+
+        if (tag != lastValue) {
+            lastValue = tag;
+            $.ajax({
+            url: "/starting-" + tag + "-limit-5.html",
+            method: "POST",
+            dataType: "json",
+            success: function (data_a) {
+                if (data_a.success == true) {
+                    $("#results").html("");
+                    jQuery.each(data_a.contenu, function (ind, obj) {
+                        var div = $('<div></div>');
+                        div.html("#" + obj);
+                        div.bind('click', function (event) {
+
+                            hashs[hashs.length - 1] = "#" + obj;
+                            var results = hashs.join(" ");
+                            $("[name='tags']").val(results);
+                            $("[name='tags']")[0].setSelectionRange(end,results.length-1);
+                            $("[name='tags']").focus();
+                            $("#results").html("");
+
+                        });
+                        $("#results").append(div);
+
+                        var end = tags.length;
+                        hashs[hashs.length - 1] = "#"+data_a.contenu[0];
+                        var results = hashs.join(" ");
+                        $("[name='tags']").val(results);
+                        $("[name='tags']")[0].setSelectionRange(end,results.length);
+                        $("[name='tags']").focus();
+
+                    });
+                } else {
+                    $("#results").html("");
+                }
+
+            },
+            error: function (un, deux, trois) {
+                alert(un + ' ' + deux + ' ' + trois);
+            }
+        });
+        }else if(event.keyCode == 38){
+            if(selectedElement == -1){
+                selectedElement = child.length - 1;
+                child[selectedElement].className = "select_focus";
+            }else if(selectedElement > 0){
+                child[selectedElement--].className = "";
+                child[selectedElement].className = "select_focus";
+            }
+        }else if(event.keyCode == 40){
+            if(selectedElement == -1){
+                selectedElement = 0;
+                child[selectedElement].className = "select_focus";
+            }else if(selectedElement < child.length -1){
+                child[selectedElement++].className = "";
+                child[selectedElement].className = "select_focus";
+            }
+        }else if(event.keyCode == 13 ){
+            if(selectedElement != -1) {
+                hashs[hashs.length - 1] = child[selectedElement].innerHTML;
+                var results = hashs.join(" ");
+                $("[name='tags']").val(results);
+                $("#results").html("");
+                return false;
+            }
+        }
+    })
+
 });
 
 $('a[href*="before"]').click(function(event){
