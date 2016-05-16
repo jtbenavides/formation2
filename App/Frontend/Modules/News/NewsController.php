@@ -23,7 +23,8 @@ class NewsController extends BackController
     $nombreCaracteres = $this->app->config()->get('nombre_caracteres');
 
     // On ajoute une définition pour le titre.
-    $this->page->addVar('title', 'Liste des ' . $nombreNews . ' dernières news '.$nombreCaracteres);
+    $this->page->addVar('title', 'Liste des ' . $nombreNews . ' dernières news ');
+    $this->app->user()->setAttribute('news_offset',$nombreNews);
 
     // On récupère le manager des news.
     $manager = $this->managers->getManagerOf('News');
@@ -74,7 +75,8 @@ class NewsController extends BackController
               $comment->setPseudo($request->postData('pseudo'));
           else:
               $comment->setAuteur(new Member([
-                  'id' => $request->postData('pseudoid')
+                  'id' => $request->postData('pseudoid'),
+                  'nickname' => $request->postData('pseudo')
               ]));
           endif;
 
@@ -92,7 +94,7 @@ class NewsController extends BackController
 
               $user ='';
               if($comment['pseudo'] == null):
-                  $pseudo = $comment->auteur()->nickname();
+                  $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
                   if($this->app()->user()->getAttribute('user_status') == 1 || $this->managers->getManagerOf('Comments')->getUnique($request->getData('id'))->auteur()->id() == $this->app()->user()->getAttribute('user_id') ):
                       $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
                   endif;
@@ -164,12 +166,24 @@ class NewsController extends BackController
           $response['success'] = true;
           $response['link'] = Direction::askRoute('Frontend', 'News', 'before', ['news' => $newsid, 'id' => $comment->id()]);
 
+          $user = '';
           if($comment->pseudo() == null):
-              $pseudo = $comment->auteur()->nickname();
-              $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment->id())).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment->id())).'>Supprimer</a>';
+              $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
+              if($this->app->user()->getAttribute('user_id') == $comment->auteur()->id() || $this->app()->user()->getAttribute('user_status') == 1 ):
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+              endif;
           else:
               $pseudo = htmlspecialchars($comment['pseudo']);
-              $user = '';
+              if($this->app->user()->getAttribute('user_status') == 1):
+                  $user = $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+              endif;
+          endif;
+
+          $comment2 = $this->managers->getManagerOf('Comments')->getCommentBefore($newsid,$comment->id());
+          if($comment2 == null):
+              $response['next'] = false;
+          else:
+              $response['next'] = true;
           endif;
 
           $response['contenu'] = '<fieldset><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
@@ -177,31 +191,46 @@ class NewsController extends BackController
           $response['success'] = false;
 
       endif;
+
       $this->page->addVar('json',$response);
   }
 
-    public function executeAfter(HTTPRequest $request){
+  public function executeAfter(HTTPRequest $request){
         $commentid = $request->getData('id');
         $newsid = $request->getData('news');
 
         $comment = $this->managers->getManagerOf('Comments')->getCommentAfter($newsid,$commentid);
-        $response = [];
-        if($comment instanceof Comment && $comment->pseudo() == null):
-            $pseudo = $comment->auteur()->nickname();
-            $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment->id())).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment->id())).'>Supprimer</a>';
-        else:
-            $pseudo = htmlspecialchars($comment['pseudo']);
-            $user = '';
-        endif;
-        if($comment !=  null) {
-            $response['success'] = true;
-            $response['link'] = Direction::askRoute('Frontend', 'News', 'before', ['news' => $newsid, 'id' => $comment->id()]);
+      $response = [];
+      if($comment !=  null) :
+          $response['success'] = true;
+          $response['link'] = Direction::askRoute('Frontend', 'News', 'after', ['news' => $newsid, 'id' => $comment->id()]);
 
-            $response['contenu'] = '<fieldset><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
-        }else{
-            $response['success'] = false;
+          $user = '';
+          if($comment->pseudo() == null):
+              $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
+              if($this->app->user()->getAttribute('user_id') == $comment->auteur()->id() || $this->app()->user()->getAttribute('user_status') == 1 ):
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+              endif;
+          else:
+              $pseudo = htmlspecialchars($comment['pseudo']);
+              if($this->app->user()->getAttribute('user_status') == 1):
+                  $user = $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+              endif;
+          endif;
 
-        }
+          $comment2 = $this->managers->getManagerOf('Comments')->getCommentAfter($newsid,$comment->id());
+          if($comment2 == null):
+              $response['next'] = false;
+          else:
+              $response['next'] = true;
+          endif;
+
+          $response['contenu'] = '<fieldset><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
+      else:
+          $response['success'] = false;
+
+      endif;
+
         $this->page->addVar('json',$response);
     }
 
@@ -228,22 +257,70 @@ class NewsController extends BackController
   }
 
   public function executeStarting(HTTPRequest $request){
-      $tag = $request->getData('tag');
       $limit = $request->getData('lim');
 
-      $listeTag = $this->managers->getManagerOf('News')->getTagcUsingStartDescription($tag,$limit);
+      if($request->getExists('tag')) {
+          $tag = $request->getData('tag');
+          $listeTag = $this->managers->getManagerOf('News')->getTagcUsingStartDescription($tag, $limit);
+      }else{
+          $listeTag = $this->managers->getManagerOf('News')->getTagcUsingStartDescription('', $limit);
+      }
 
-      $response = [];
-      if(empty($listeTag)):
-          $response['success'] = false;
-          $response['error'] = "Pas de tag";
-      else:
-          $response['success'] = true;
-          $response['contenu'] = $listeTag;
+          $response = [];
+          if (empty($listeTag)):
+              $response['success'] = false;
+              $response['error'] = "Pas de tag";
+          else:
+              $response['success'] = true;
+              $response['contenu'] = $listeTag;
 
-      endif;
+          endif;
+
+
       $this->page->addVar('json',$response);
   }
 
+  public function executeExist(HTTPRequest $request){
+      $attribute = $request->getData('attribute');
+      $val = $request->postData('value');
+      $method = 'getMembercUsing'.ucfirst($attribute);
+      $member = $this->managers->getManagerOf('Member')->$method($val);
+
+      $response = [];
+      if($member == null):
+          $response['success'] = false;
+      else:
+          $response['success'] = true;
+      endif;
+
+      $this->page->addVar('json',$response);
+  }
+
+  public function executeScroll(HTTPRequest $request){
+      $offset = $request->app()->user()->getAttribute('news_offset');
+      $limit = $this->app->config()->get('nombre_news');
+      $nombreCaracteres = $this->app->config()->get('nombre_caracteres');
+
+      $manager = $this->managers->getManagerOf('News');
+
+      $listeNews = $manager->getList($offset, $limit);
+
+      $this->app->user()->setAttribute('news_offset',$offset + $limit);
+
+      $html = '';
+
+      foreach ($listeNews as $news) {
+          if (strlen($news->contenu()) > $nombreCaracteres) {
+              $debut = substr($news->contenu(), 0, $nombreCaracteres);
+              $debut = substr($debut, 0, strrpos($debut, ' ')) . '...';
+              
+              $news->setContenu($debut);
+          }
+      }
+
+
+
+      $this->page->addVar('json',$listeNews);
+  }
 
 }

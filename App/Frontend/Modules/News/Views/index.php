@@ -1,4 +1,6 @@
-<?php use \OCFram\Direction;
+<?php use \OCFram\Direction; ?>
+<h1 id="index">Last News<h1>
+<?php
 foreach ($listeNews as $news)
 {
 ?>

@@ -129,9 +129,15 @@ class NewsManagerPDO extends NewsManager
 
     public function getTagcUsingStartDescription($startdescription, $limit)
     {
-        $requete = $this->dao->prepare('SELECT NTC_id,NTC_description FROM t_new_tagc INNER JOIN t_new_tagd ON NTC_id = NTD_fk_NTC WHERE NTC_description LIKE :startdescription GROUP BY NTC_id,NTC_description ORDER BY COUNT(*) DESC LIMIT :limit');
+        $query = 'SELECT NTC_id,NTC_description FROM t_new_tagc INNER JOIN t_new_tagd ON NTC_id = NTD_fk_NTC WHERE NTC_description LIKE :startdescription GROUP BY NTC_id,NTC_description ORDER BY COUNT(*) DESC';
+        if((int) $limit>0):
+            $query .= ' LIMIT :limit';
+        endif;
+        $requete = $this->dao->prepare($query);
         $requete->bindValue(':startdescription', $startdescription."%", \PDO::PARAM_STR);
-        $requete->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+        if((int) $limit>0):
+            $requete->bindValue(':limit', (int) $limit, \PDO::PARAM_INT);
+        endif;
         $requete->execute();
 
         $listeTableau = $requete->fetchAll();
@@ -221,8 +227,6 @@ class NewsManagerPDO extends NewsManager
         endif;
     }
 
-
-
     protected function modify(News $news)
     {
         $requete = $this->dao->prepare('UPDATE news SET titre = :titre, contenu = :contenu, dateModif = NOW() WHERE id = :id');
@@ -253,7 +257,7 @@ class NewsManagerPDO extends NewsManager
         return $this->dao->query('SELECT COUNT(*) FROM news')->fetchColumn();
       }
 
-      public function getList($debut = -1, $limite = -1)
+    public function getList($debut = -1, $limite = -1)
       {
         $sql = 'SELECT id, MMC_id, MMC_nickname, titre, contenu, dateAjout, dateModif FROM news INNER JOIN T_MEM_memberc ON MMC_id = auteur ORDER BY id DESC';
 
@@ -280,7 +284,7 @@ class NewsManagerPDO extends NewsManager
         return $listeNews;
       }
 
-      public function getUnique($id)
+    public function getUnique($id)
       {
           $requete = $this->dao->prepare('SELECT id, MMC_id, MMC_nickname, titre, contenu, dateAjout, dateModif FROM news INNER JOIN t_mem_memberc ON auteur = MMC_id WHERE id = :id');
           $requete->bindValue(':id', (int) $id, \PDO::PARAM_INT);
@@ -295,4 +299,5 @@ class NewsManagerPDO extends NewsManager
 
         return null;
       }
+
 }

@@ -10,6 +10,8 @@ abstract class MemberManager extends Manager{
     abstract public function getMembercUsingNickname($memberc_nickname);
 
     abstract public function getMembercUsingId($memberc_id);
+
+    abstract public function getMembercUsingEmail($memberc_email);
     
     abstract public function add(Member $Member);
 

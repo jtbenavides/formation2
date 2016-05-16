@@ -418,3 +418,8 @@ footer a {
 .select_focus{
 	background-color: aliceblue;
 }
+
+.checkform label, .checkform p {
+
+	display: inline-block;
+}

@@ -50,6 +50,21 @@ class MemberManagerPDO extends MemberManager
         return null;
     }
 
+    public function getMembercUsingEmail($memberc_email)
+    {
+        $requete = $this->dao->prepare('SELECT MMC_id AS id, MMC_login AS login, MMC_nickname AS nickname,MMC_fk_MMY as status, MMC_hash AS hash FROM t_mem_memberc WHERE MMC_email = :MMC_email');
+        $requete->bindValue(':MMC_email', (string) $memberc_email, \PDO::PARAM_STR);
+        $requete->execute();
+
+        $requete->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, '\Entity\Member');
+
+        if ($member = $requete->fetch()) {
+            return $member;
+        }
+
+        return null;
+    }
+
     public function add(Member $member)
     {
 

@@ -10,6 +10,8 @@
     <meta charset="utf-8" />
  
     <link rel="stylesheet" href="/css/Envision.css" type="text/css" />
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
   </head>
  
   <body>
@@ -56,4 +58,5 @@
   </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script src="/js/mon-script.js"></script>

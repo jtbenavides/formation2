@@ -3,6 +3,7 @@ namespace Entity;
 
 use \OCFram\Entity;
 
+
 class Member extends Entity{
     protected $id,
               $login,

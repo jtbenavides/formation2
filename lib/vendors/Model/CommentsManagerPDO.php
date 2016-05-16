@@ -142,7 +142,7 @@ class CommentsManagerPDO extends CommentsManager
 
     public function getCommentAfter($newsid, $commentid)
     {
-        $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE id > :id AND news = :news ORDER BY id DESC LIMIT 1');
+        $q = $this->dao->prepare('SELECT id, news, MMC_id, MMC_nickname, pseudo, contenu, date FROM comments LEFT OUTER JOIN T_MEM_memberc ON MMC_id = auteur WHERE id > :id AND news = :news ORDER BY id ASC LIMIT 1');
         $q->bindValue(':id', $commentid, \PDO::PARAM_INT);
         $q->bindValue(':news', $newsid, \PDO::PARAM_INT);
         $q->execute();
