@@ -96,16 +96,16 @@ class NewsController extends BackController
               if($comment['pseudo'] == null):
                   $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
                   if($this->app()->user()->getAttribute('user_status') == 1 || $this->managers->getManagerOf('Comments')->getUnique($request->getData('id'))->auteur()->id() == $this->app()->user()->getAttribute('user_id') ):
-                      $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
+                      $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a class="link-delete" href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
                   endif;
               else:
                   $pseudo = htmlspecialchars($comment['pseudo']);
                   if($this->app()->user()->getAttribute('user_status') == 1):
-                      $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
+                      $user = ' - <a href='.Direction::askRoute('Backend','News','updateComment',array('id' => $comment['id'])).'>Modifier</a> | <a class="link-delete" href='.Direction::askRoute('Backend','News','deleteComment',array('id' =>$comment['id'])).'>Supprimer</a>';
                   endif;
               endif;
 
-              $response['contenu'] = '<fieldset><legend>Posté par <strong>'.$pseudo.'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
+              $response['contenu'] = '<fieldset style="display:none" class="new comment"><legend>Posté par <strong>'.$pseudo.'</strong> le '.$comment['date']->format('d/m/Y à H\hi') .$user. '</legend><p>'.nl2br($comment['contenu']).'</p></fieldset>';
 
           endif;
 
@@ -146,7 +146,7 @@ class NewsController extends BackController
               $dateb = $b->dateModif();
           endif;
 
-          if($datea < $dateb){
+          if($datea > $dateb){
               return -1;
           }
           return 1;
@@ -170,12 +170,12 @@ class NewsController extends BackController
           if($comment->pseudo() == null):
               $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
               if($this->app->user()->getAttribute('user_id') == $comment->auteur()->id() || $this->app()->user()->getAttribute('user_status') == 1 ):
-                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a class="link-delete" href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
               endif;
           else:
               $pseudo = htmlspecialchars($comment['pseudo']);
               if($this->app->user()->getAttribute('user_status') == 1):
-                  $user = $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a class="link-delete" href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
               endif;
           endif;
 
@@ -186,7 +186,7 @@ class NewsController extends BackController
               $response['next'] = true;
           endif;
 
-          $response['contenu'] = '<fieldset><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
+          $response['contenu'] = '<fieldset style="display:none" class="comment"><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
       else:
           $response['success'] = false;
 
@@ -209,12 +209,12 @@ class NewsController extends BackController
           if($comment->pseudo() == null):
               $pseudo = '<a href='.Direction::askRoute('Frontend','News','user',['id' => $comment->auteur()->id()]).'>'.$comment->auteur()->nickname().'</a>';
               if($this->app->user()->getAttribute('user_id') == $comment->auteur()->id() || $this->app()->user()->getAttribute('user_status') == 1 ):
-                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a class="link-delete" href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
               endif;
           else:
               $pseudo = htmlspecialchars($comment['pseudo']);
               if($this->app->user()->getAttribute('user_status') == 1):
-                  $user = $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
+                  $user = ' - <a href=' . Direction::askRoute('Backend', 'News', 'updateComment', array('id' => $comment->id())) . '>Modifier</a> | <a class="link-delete" href=' . Direction::askRoute('Backend', 'News', 'deleteComment', array('id' => $comment->id())) . '>Supprimer</a>';
               endif;
           endif;
 
@@ -225,7 +225,7 @@ class NewsController extends BackController
               $response['next'] = true;
           endif;
 
-          $response['contenu'] = '<fieldset><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
+          $response['contenu'] = '<fieldset style="display:none" class="comment"><legend>Posté par <strong>' . $pseudo . '</strong> le ' . $comment->date()->format('d/m/Y à H\hi') . $user . '</legend><p>' . nl2br($comment->contenu()) . '</p></fieldset>';
       else:
           $response['success'] = false;
 
@@ -307,20 +307,24 @@ class NewsController extends BackController
 
       $this->app->user()->setAttribute('news_offset',$offset + $limit);
 
-      $html = '';
+      $respons = [];
+      if(count($listeNews) < $limit):
+          $response['next'] = false;
+      else:
+          $response['next'] = true;
+      endif;
 
       foreach ($listeNews as $news) {
           if (strlen($news->contenu()) > $nombreCaracteres) {
               $debut = substr($news->contenu(), 0, $nombreCaracteres);
               $debut = substr($debut, 0, strrpos($debut, ' ')) . '...';
-              
+
               $news->setContenu($debut);
           }
       }
+      $response['contenu'] = $listeNews;
 
-
-
-      $this->page->addVar('json',$listeNews);
+      $this->page->addVar('json',$response);
   }
 
 }

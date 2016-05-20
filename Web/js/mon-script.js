@@ -1,25 +1,49 @@
 "use strict";
-var selectedElement = -1;
-var lastValue = "";
-var child = 0;
+
+(function ($, undefined) {
+    $.fn.getCursorPosition = function () {
+        var el = $(this).get(0);
+        var pos = 0;
+        if ('selectionStart' in el) {
+            pos = el.selectionStart;
+        } else if ('selection' in document) {
+            el.focus();
+            var Sel = document.selection.createRange();
+            var SelLength = document.selection.createRange().text.length;
+            Sel.moveStart('character', -el.value.length);
+            pos = Sel.text.length - SelLength;
+        }
+        return pos;
+    }
+})(jQuery);
+
 
 $(document).ready(function () {
 
-    if($("#index").length) {
+
+    if ($("#index").length) {
+        var scrolling = true;
         var win = $(window);
         // Each time the user scrolls
         win.scroll(function () {
             // End of the document reached?
-            if ($(window).scrollTop() + $(window).height() + 1 > $(document).height()) {
+            if ($(window).scrollTop() + $(window).height() + 1 > $(document).height() && scrolling) {
                 //$('#loading').show();
                 $.ajax({
                     url: '/news-scroll.html',
                     dataType: 'json',
                     success: function (data) {
-                        for (var i in data) {
-                            $('#main').append(data[i].titre);
-                            $('#main').append(data[i].contenu);
+                        scrolling = data.next;
+
+                        var html = '<section style="display:none" class="news">';
+                        for (var i in data.contenu) {
+                            html += (data.contenu[i].titre);
+                            html += (data.contenu[i].contenu);
                         }
+                        html += '</section>';
+                        $("#main").append(html);
+
+                        $(".news").show("slide", {direction: "up"});
                         //$('#loading').hide();
                     }
                 });
@@ -28,70 +52,92 @@ $(document).ready(function () {
     }
 
     // bind 'myForm' and provide a simple callback function
-    $("#clock").hide();
-    $('#button_submit').click(function (event) {
-
-        var user = !$("#user");
-        $("#form").hide();
+    if ($("#button_submit").length) {
         $("#display").append('<img src="images/clock.gif" />');
-        $.ajax({
-            url: $("#news").val(),
-            method: "POST",
-            data: {
-                pseudo: $("#pseudo").val(),
-                pseudoid: $("#pseudoid").val(),
-                contenu: $("#contenu").val(),
-                user: user
-            },
-            dataType: "json",
-            success: function (data_a, deux, trois) {
-                if ($("#lpseudo").length != 0) {
-                    $("#lpseudo").html($("#lpseudo").html().substring(0, $("#lpseudo").html().indexOf(":") + 2));
-                }
+        $('#button_submit').click(function (event) {
 
-                $("#lcontenu").html($("#lcontenu").html().substring(0, $("#lcontenu").html().indexOf(":") + 2));
+            $("#form").fadeOut(500, function () {
 
-                if (data_a.success) {
-                    var content = $("#content").html();
-                    if (content.localeCompare("<p>Aucun commentaire n'a encore été posté. Soyez le premier à en laisser un !</p>") == 0) {
-                        $("#content").html(data_a.contenu);
-                    } else {
-                        $("#content").append(data_a.contenu);
-                    }
+                $("#display").fadeIn(500, function () {
+                    $.ajax({
+                        url: $("#news").val(),
+                        method: "POST",
+                        data: {
+                            pseudo: $("#pseudo").val(),
+                            pseudoid: $("#pseudoid").val(),
+                            contenu: $("#contenu").val()
+                        },
+                        dataType: "json",
+                        success: function (data_a) {
+                            if ($("#lpseudo").length) {
+                                $("#lpseudo").html($("#lpseudo").html().substring(0, $("#lpseudo").html().indexOf(":") + 2));
+                            }
 
-                    $('#form').each(function () {
-                        this.reset();
+
+                            if (data_a.success) {
+                                var content = $("#content").html();
+                                if ($("#content fieldset").length) {
+                                    $("#content").append(data_a.contenu);
+                                } else {
+                                    $("#content").html(data_a.contenu);
+                                }
+
+                                $(".new").show("slide", {direction: "up"}, 1000);
+
+
+                                $(".link-delete").click(function (event) {
+                                    return manageDeleteComment(this);
+                                });
+
+                                cleanLabel("contenu");
+
+                                $('#form').each(function () {
+                                    this.reset();
+                                });
+
+                            } else {
+                                var msg = " " + data_a.form;
+                                $("#lcontenu").append(msg.fontcolor("red"));
+                            }
+
+                        },
+                        complete: function (un, deux) {
+                            setTimeout(function () {
+                                $("#display").fadeOut(500, function () {
+                                    $("#form").fadeIn(500, function () {
+                                        $("#contenu").focus();
+                                    });
+                                });
+                            }, 1000);
+
+
+                        }
+
                     });
+                });
+            });
 
-                } else {
-                    var msg = data_a.form;
-                    $("label:contains(" + capitalise(data_a.field) + ")").append(msg.fontcolor("red"));
-                }
 
-            },
-            complete: function (un, deux) {
-                $("#display").html('');
-                $("#form").show();
-            }
-
+            return false;
         });
+    }
 
-        return false;
-    });
-
+    if ($("#button_submit").length || $("#check-comment").length) {
+        $('.link-delete').click(function (event) {
+            return manageDeleteComment(this);
+        });
+    }
 
     if ($("#subscription").length) {
         $("#subscription").submit(function (event) {
 
-
-            $("label:contains('Email')").html('Email');
-            $("label:contains('Confirmation')").html('Confirmation de Mot de Passe');
-            $("label:contains('Login')").html('Login');
-            $("label:contains('Pseudo')").html('Pseudo');
-
+            cleanLabel("email");
+            cleanLabel("password2");
+            cleanLabel("login");
+            cleanLabel("nickname");
 
             $.ajax({
-                url: "/insertAuthor",
+                url: "/signin",
                 method: "POST",
                 data: $('#subscription').serializeArray().reduce(function (obj, item) {
                     obj[item.name] = item.value;
@@ -100,206 +146,263 @@ $(document).ready(function () {
                 dataType: "json",
                 success: function (data_a) {
 
-                    if (data_a.success == true) {
+                    if (data_a.success) {
                         window.location.replace("/admin/");
                     } else {
-                        var msg = " " + data_a.form;
-                        $("label:contains(" + capitalise(data_a.field) + ")").append(msg.fontcolor("red"));
+                        for(var i in data_a.form){
+                            var t = 'label[for="'+i+'"]';
+                            console.log(t);
+                            var y = "<label class='error' >"+data_a.form[i]+"</label>";
+                            console.log(y);
+                            $(t).before("<label class='error' >"+data_a.form[i]+"</label>");
+                        }
+
+                        //$("#form").html(data_a.form);
                     }
+/*
+                    $("#login").on("paste keyup", function (event) {
+                        if (event.keyCode == 9) {
+                            return;
+                        }
+                        cleanLabel('login');
 
-                },
-                error: function (un, deux, trois) {
-                    alert(un + ' ' + deux + ' ' + trois);
-                },
-                complete: function (un, deux) {
+                        clearTimeout($(this).data('timeout'));
+                        $(this).data('timeout', setTimeout(function () {
+                            var value = $("#login").val();
+                            if (value == '') {
+                                $("label[for='login']").append(" Login vide");
+                            } else {
+                                $.ajax({
+                                    url: "/exist-login.html",
+                                    method: "POST",
+                                    dataType: "json",
+                                    data: {
+                                        value: value
+                                    },
+                                    success: function (data_a) {
+
+                                        if (data_a.success) {
+                                            $("label[for='login']").append(" Login deja utilisé");
+                                        }
+                                    },
+                                    error: function (un, deux, trois) {
+                                        alert(un + ' ' + deux + ' ' + trois);
+                                    }
+                                });
+                            }
+                        }, 500));
+                    });
+
+                    $("#nickname").on("paste keyup", function (event) {
+                        if (event.keyCode == 9) {
+                            return;
+                        }
+                        cleanLabel('nickname');
+
+                        clearTimeout($(this).data('timeout'));
+                        $(this).data('timeout', setTimeout(function () {
+                            var value = $("#nickname").val();
+                            if (value == '') {
+                                $("label[for='nickname']").append(" Pseudo vide");
+                            } else if (event.keyCode == 9) {
+                                return;
+                            } else {
+                                $.ajax({
+                                    url: "/exist-nickname.html",
+                                    method: "POST",
+                                    dataType: "json",
+                                    data: {
+                                        value: value
+                                    },
+                                    success: function (data_a) {
+
+                                        if (data_a.success) {
+                                            $("label[for='nickname']").append(" Pseudo deja utilisé");
+                                        }
+                                    }
+                                });
+                            }
+                        }, 500));
+                    });
+
+                    $("#email").on("paste keyup", function (event) {
+                        if (event.keyCode == 9) {
+                            return;
+                        }
+                        cleanLabel('email');
+
+                        clearTimeout($(this).data('timeout'));
+                        $(this).data('timeout', setTimeout(function () {
+                            var value = $("#email").val();
+                            if (value == '') {
+                                $("label[for='email']").append(" Email vide");
+                            } else if (!checkMail(value)) {
+                                $("label[for='email']").append(" Ce n'est pas un email correct");
+                            } else {
+                                $.ajax({
+                                    url: "/exist-email.html",
+                                    method: "POST",
+                                    dataType: "json",
+                                    data: {
+                                        value: value
+                                    },
+                                    success: function (data_a) {
+                                        if (data_a.success) {
+                                            $("label[for='email']").append(" Email deja utilisé");
+                                        }
+                                    }
+                                });
+                            }
+                        }, 500));
+                    });
+
+                    $("#password2").on("paste keyup", function (event) {
+                        cleanLabel('password2');
+
+                        clearTimeout($(this).data('timeout'));
+                        $(this).data('timeout', setTimeout(function () {
+                            var value = $("#password1").val();
+                            if (value != $("#password2").val()) {
+                                $("label[for='password2']").append(" Mot de passe différent");
+                            }
+                        }, 500));
+                    });
+*/
                 }
-
             });
-
             return false;
         });
 
-        $("[name='login']").bind("keyup", function (event) {
-            cleanLabel('Login');
+        $("#login").on("paste keyup", function (event) {
+            if (event.keyCode == 9) {
+                return;
+            }
+            cleanLabel('login');
 
-            var value = $("[name='login']").val();
-            if (value == '') {
-                $("label:contains('Login')").append(" : Login vide");
-            } else {
-                $.ajax({
-                    url: "/exist-login.html",
-                    method: "POST",
-                    dataType: "json",
-                    data: {
-                        value: value
-                    },
-                    success: function (data_a) {
+            clearTimeout($(this).data('timeout'));
+            $(this).data('timeout', setTimeout(function () {
+                var value = $("#login").val();
+                if (value == '') {
+                    $("label[for='login']").append(" Login vide");
+                } else {
+                    $.ajax({
+                        url: "/exist-login.html",
+                        method: "POST",
+                        dataType: "json",
+                        data: {
+                            value: value
+                        },
+                        success: function (data_a) {
 
-                        if (data_a.success == true) {
-                            $("label:contains('Login')").append(" : Login deja utilisé");
+                            if (data_a.success) {
+                                $("label[for='login']").append(" Login deja utilisé");
+                            }
+                        },
+                        error: function (un, deux, trois) {
+                            alert(un + ' ' + deux + ' ' + trois);
                         }
-                    },
-                    error: function (un, deux, trois) {
-                        alert(un + ' ' + deux + ' ' + trois);
-                    }
-                });
-            }
+                    });
+                }
+            }, 500));
         });
 
-        $("[name='nickname']").bind("keyup", function (event) {
-            cleanLabel('Pseudo');
+        $("#nickname").on("paste keyup", function (event) {
+            if (event.keyCode == 9) {
+                return;
+            }
+            cleanLabel('nickname');
 
-            var value = $("[name='nickname']").val();
-            if (value == '') {
-                $("label:contains('Pseudo')").append(" : Pseudo vide");
-            } else {
-                $.ajax({
-                    url: "/exist-nickname.html",
-                    method: "POST",
-                    dataType: "json",
-                    data: {
-                        value: value
-                    },
-                    success: function (data_a) {
+            clearTimeout($(this).data('timeout'));
+            $(this).data('timeout', setTimeout(function () {
+                var value = $("#nickname").val();
+                if (value == '') {
+                    $("label[for='nickname']").append(" Pseudo vide");
+                } else if (event.keyCode == 9) {
+                    return;
+                } else {
+                    $.ajax({
+                        url: "/exist-nickname.html",
+                        method: "POST",
+                        dataType: "json",
+                        data: {
+                            value: value
+                        },
+                        success: function (data_a) {
 
-                        if (data_a.success == true) {
-                            $("label:contains('Pseudo')").append(" : Pseudo deja utilisé");
+                            if (data_a.success) {
+                                $("label[for='nickname']").append(" Pseudo deja utilisé");
+                            }
                         }
-                    },
-                    error: function (un, deux, trois) {
-                        alert(un + ' ' + deux + ' ' + trois);
-                    }
-                });
-            }
+                    });
+                }
+            }, 500));
         });
 
-        $("[name='email']").bind("keyup", function (event) {
-            cleanLabel('Email');
+        $("#email").on("paste keyup", function (event) {
+            if (event.keyCode == 9) {
+                return;
+            }
+            cleanLabel('email');
 
-            var value = $("[name='email']").val();
-            if (value == '') {
-                $("label:contains('Email')").append(" : Email vide");
-            } else if (!checkMail(value)) {
-                $("label:contains('Email')").append(" : Ce n'est pas un email correct");
-            } else {
-                $.ajax({
-                    url: "/exist-email.html",
-                    method: "POST",
-                    dataType: "json",
-                    data: {
-                        value: value
-                    },
-                    success: function (data_a) {
-
-
-                        if (data_a.success == true) {
-                            $("label:contains('Email')").append(" : Email deja utilisé");
+            clearTimeout($(this).data('timeout'));
+            $(this).data('timeout', setTimeout(function () {
+                var value = $("#email").val();
+                if (value == '') {
+                    $("label[for='email']").append(" Email vide");
+                } else if (!checkMail(value)) {
+                    $("label[for='email']").append(" Ce n'est pas un email correct");
+                } else {
+                    $.ajax({
+                        url: "/exist-email.html",
+                        method: "POST",
+                        dataType: "json",
+                        data: {
+                            value: value
+                        },
+                        success: function (data_a) {
+                            if (data_a.success) {
+                                $("label[for='email']").append(" Email deja utilisé");
+                            }
                         }
-                    },
-                    error: function (un, deux, trois) {
-                        alert(un + ' ' + deux + ' ' + trois);
-                    }
-                });
-            }
+                    });
+                }
+            }, 500));
         });
 
-        $("[name='password2']").bind("keyup", function (event) {
-            cleanLabel('Confirmation');
+        $("#password2").on("paste keyup", function (event) {
+            cleanLabel('password2');
 
-            var value = $("[name='password1']").val();
-            if (value != $("[name='password2']").val()) {
-                $("label:contains('Confirmation')").append(" : Mot de passe différent");
-            }
+            clearTimeout($(this).data('timeout'));
+            $(this).data('timeout', setTimeout(function () {
+                var value = $("#password1").val();
+                if (value != $("#password2").val()) {
+                    $("label[for='password2']").append(" Mot de passe différent");
+                }
+            }, 500));
         });
+
     }
 
-    /*$("[name='tags']").bind('keyup',function(event) {
-     child = $("#results")[0].childNodes;
+    if ($("#news-modify").length) {
+        var data = $("#tags").val();
+        var tags = data.split(" ");
+        for (var i in tags) {
+            if (tags[i] != '') {
+                add_tags(tags[i]);
+            }
+        }
 
-     var tags = $("[name='tags']").val();
-     var hashs = tags.split(" ");
-     if (hashs[hashs.length - 1].length == 0) return;
-     var tag = hashs[hashs.length - 1];
-     if (tag.substring(0, 1) != "#" || tag.length == 1) return;
-     tag = tag.substring(1);
+    }
 
-     if (tag != lastValue) {
-     lastValue = tag;
-     $.ajax({
-     url: "/starting-" + tag + "-limit-5.html",
-     method: "POST",
-     dataType: "json",
-     success: function (data_a) {
-     if (data_a.success == true) {
-     $("#results").html("");
-     jQuery.each(data_a.contenu, function (ind, obj) {
-     var div = $('<div></div>');
-     div.html("#" + obj);
-     div.bind('click', function (event) {
-
-     hashs[hashs.length - 1] = "#" + obj;
-     var results = hashs.join(" ");
-     $("[name='tags']").val(results);
-     $("[name='tags']")[0].setSelectionRange(end,results.length-1);
-     $("[name='tags']").focus();
-     $("#results").html("");
-
-     });
-     $("#results").append(div);
-
-     var end = tags.length;
-     hashs[hashs.length - 1] = "#"+data_a.contenu[0];
-     var results = hashs.join(" ");
-     $("[name='tags']").val(results);
-     $("[name='tags']")[0].setSelectionRange(end,results.length);
-     $("[name='tags']").focus();
-
-     });
-     } else {
-     $("#results").html("");
-     }
-
-     },
-     error: function (un, deux, trois) {
-     alert(un + ' ' + deux + ' ' + trois);
-     }
-     });
-     }else if(event.keyCode == 38){
-     if(selectedElement == -1){
-     selectedElement = child.length - 1;
-     child[selectedElement].className = "select_focus";
-     }else if(selectedElement > 0){
-     child[selectedElement--].className = "";
-     child[selectedElement].className = "select_focus";
-     }
-     }else if(event.keyCode == 40){
-     if(selectedElement == -1){
-     selectedElement = 0;
-     child[selectedElement].className = "select_focus";
-     }else if(selectedElement < child.length -1){
-     child[selectedElement++].className = "";
-     child[selectedElement].className = "select_focus";
-     }
-     }else if(event.keyCode == 13 ){
-     if(selectedElement != -1) {
-     hashs[hashs.length - 1] = child[selectedElement].innerHTML;
-     var results = hashs.join(" ");
-     $("[name='tags']").val(results);
-     $("#results").html("");
-     return false;
-     }
-     }
-     });*/
-
-    var availableTags = [];
-    if ($("[name='tags']").length) {
+    if ($("#tags").length) {
+        var available_tags = [];
         $.ajax({
             url: "/starting-limit-0.html",
             method: "POST",
             dataType: "json",
             success: function (data_a) {
                 if (data_a.success == true) {
-                    availableTags = data_a.contenu;
+                    available_tags = data_a.contenu;
                 }
 
             },
@@ -308,11 +411,48 @@ $(document).ready(function () {
             }
         });
 
-        $("[name='tags']")
+        $("#news-add, #news-modify").on("click", function () {
+            $("#tags").css("display", "none");
+
+            var tags = '';
+            $(".tags").each(function (ind, elem) {
+                var data = elem.innerHTML.split(" ");
+                tags += data[0] + " ";
+                console.log(tags);
+            });
+            $("#tags").val(tags);
+        });
+
+        $("#tags")
         // don't navigate away from the field on tab when selecting an item
-            .bind("keydown", function (event) {
-                if (event.keyCode === $.ui.keyCode.TAB &&
-                    $(this).autocomplete("instance").menu.active) {
+            .on("keydown", function (event) {
+                if (event.keyCode == $.ui.keyCode.BACKSPACE) {
+                    if ($("#tags").getCursorPosition() == 0 || $("#tags").val() == '') {
+                        $("#tags").prev("p").remove();
+                    }
+                }
+                if (event.keyCode == $.ui.keyCode.SPACE) {
+                    if ($("#tags").val() == '') {
+                        event.preventDefault();
+                    }
+                    else {
+                        add_tags("#" + $("#tags").val());
+
+                        event.preventDefault();
+
+                    }
+                }
+                if (event.keyCode == $.ui.keyCode.ENTER) {
+                    if ($("#tags").val() == '') {
+                        //event.stopPropagation();
+                        event.preventDefault();
+                    } else {
+                        add_tags("#" + $("#tags").val());
+                        event.preventDefault();
+
+                    }
+                }
+                if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete(".tags").menu.active) {
                     event.preventDefault();
                 }
             })
@@ -321,36 +461,29 @@ $(document).ready(function () {
                 source: function (request, response) {
                     // delegate back to autocomplete, but extract the last term
                     response($.ui.autocomplete.filter(
-                        availableTags, extractLast(request.term)));
+                        available_tags, extractLast(request.term)));
                 },
                 focus: function () {
                     // prevent value inserted on focus
                     return false;
                 },
                 select: function (event, ui) {
-                    var terms = split(this.value);
-                    // remove the current input
-                    terms.pop();
-                    // add the selected item
-                    terms.push("#" + ui.item.value);
-                    // add placeholder to get the comma-and-space at the end
-                    terms.push("");
-                    this.value = terms.join(" ");
+                    add_tags("#" + ui.item.value);
                     return false;
                 }
             });
     }
 
-    if($("#check-comment").length) {
-        $('a[href*="before"]').each(function () {
-            var a = $(this);
+    if ($("#check-comment").length) {
+        $('.link-before, .link-after').each(function () {
+            var link = $(this);
             $.ajax({
-                url: $(this).attr("href"),
+                url: link.attr("href"),
                 method: "POST",
                 dataType: "json",
                 success: function (data_a) {
                     if (!data_a.success) {
-                        a.html("");
+                        link.html("");
                     }
                 },
                 error: function (u, d, t) {
@@ -359,68 +492,41 @@ $(document).ready(function () {
             });
         });
 
-        $('a[href*="after"]').each(function () {
-            var a = $(this);
+        $('.link-before, .link-after').click(function (event) {
+            var link = $(this);
+            var url = $(this).attr("href");
+            var direction = '';
+            var position = '';
+
+            if ($(this).hasClass("link-before")) {
+                direction = "up";
+                position = "before";
+            } else {
+                direction = "down";
+                position = "after";
+            }
+
             $.ajax({
-                url: $(this).attr("href"),
+                url: url,
                 method: "POST",
                 dataType: "json",
                 success: function (data_a) {
+                    if (data_a.success) {
+                        link[position](data_a.contenu);
 
-                    if (!data_a.success) {
-                        a.html("");
-                    }
-                },
-                error: function (u, d, t) {
-                    alert(u + ' ' + d + ' ' + t);
-                }
-            });
-        });
+                        $(".comment").show("slide", {direction: direction});
 
-        $('a[href*="before"]').click(function (event) {
-            var a = $(this);
-            var addressValue = $(this).attr("href");
-            $.ajax({
-                url: addressValue,
-                method: "POST",
-                dataType: "json",
-                success: function (data_a) {
-                    if (data_a.success == true) {
-                        a.after(data_a.contenu);
-                        a.attr("href", data_a.link);
+                        link.attr("href", data_a.link);
+
                         if (!data_a.next) {
-                            a.html("");
+                            link.remove();
                         }
+
+                        $(".link-delete").click(function (event) {
+                            return manageDeleteComment(this);
+                        });
                     } else {
-                        a.html("");
-                    }
-                },
-                error: function (u, d, t) {
-                    alert(u + ' ' + d + ' ' + t);
-                }
-            });
-            return false;
-        });
-
-        $('a[href*="after"]').click(function (event) {
-            var a = $(this);
-            var addressValue = $(this).attr("href");
-            $.ajax({
-                url: addressValue,
-                method: "POST",
-                dataType: "json",
-                success: function (data_a) {
-
-                    if (data_a.success == true) {
-
-                        a.before(data_a.contenu);
-
-                        a.attr("href", data_a.link);
-                        if (!data_a.next) {
-                            a.html("");
-                        }
-                    } else {
-                        a.html("");
+                        link.html("");
                     }
                 },
                 error: function (u, d, t) {
@@ -431,7 +537,7 @@ $(document).ready(function () {
         });
 
         $("#check-comment").click(function () {
-            $(".comment").slideToggle(500);
+            $(".comments").slideToggle(500);
         });
 
         $("#check-created").click(function () {
@@ -444,26 +550,26 @@ $(document).ready(function () {
     }
 });
 
-function checkNotNull(value) {
-    return value != '';
+function add_tags(value) {
+    $("#tags").before("<p class='tags'>" + value + " <button>x</button> </p>");
+    $("#tags").prev().children().on("click", function (event) {
+        $(this).parent().remove();
+    });
+    $("#tags").val('');
 }
 
 function cleanLabel(name) {
-    var req = 'label:contains(\'' + name + '\')';
+    var req = 'label[for=\'' + name + '\']';
     var html = $(req).html();
     var length = html.indexOf(" :");
     if (length != -1) {
-        $(req).html(html.substr(0, length));
+        $(req).html(html.substr(0, length+2));
     }
 }
 
 function checkMail(email) {
     var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
     return regex.test(email);
-}
-
-function capitalise(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
 function split(val) {
@@ -473,3 +579,29 @@ function split(val) {
 function extractLast(term) {
     return split(term).pop();
 }
+
+function manageDeleteComment(button_clicked) {
+    var url = $(button_clicked).attr("href");
+    var links = $('a[href="' + url + '"]');
+    var $fieldset_comment = links.parents(".comment");
+
+    $.ajax({
+        url: url,
+        method: "POST",
+        dataType: "json",
+        success: function (data_a) {
+            if (data_a.success == true) {
+
+                $fieldset_comment.hide("slide", {direction: "right"}, 1000, function () {
+
+                    $(this).remove();
+                });
+
+            }
+        },
+        error: function (u, d, t) {
+            alert(u + ' ' + d + ' ' + t);
+        }
+    });
+    return false;
+};

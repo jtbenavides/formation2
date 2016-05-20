@@ -2,8 +2,11 @@
 namespace FormBuilder;
 
 use OCFram\ComparisonValidator;
-use OCFram\EmailValidator;
+use OCFram\EmailDatabaseValidator;
+use OCFram\EmailPatternValidator;
 use \OCFram\FormBuilder;
+use OCFram\LoginDatabaseValidator;
+use OCFram\NicknameDatabaseValidator;
 use OCFram\PasswordField;
 use \OCFram\StringField;
 use \OCFram\MaxLengthValidator;
@@ -31,8 +34,9 @@ class AuthorFormBuilder extends FormBuilder
             'name' => 'login',
             'maxLength' => 24,
             'validators' => [
-                new MaxLengthValidator('L\'auteur spécifié est trop long (24 caractères maximum)', 24),
+                new MaxLengthValidator('Le login spécifié est trop long (24 caractères maximum)', 24),
                 new NotNullValidator('Merci de spécifier le login'),
+                new LoginDatabaseValidator('Ce login est deja utilisé')
             ],
         ]))
             ->add(new StringField([
@@ -40,16 +44,18 @@ class AuthorFormBuilder extends FormBuilder
                 'name' => 'nickname',
                 'maxLength' => 24,
                 'validators' => [
-                    new MaxLengthValidator('L\'auteur spécifié est trop long (24 caractères maximum)', 24),
+                    new MaxLengthValidator('Le pseudo spécifié est trop long (24 caractères maximum)', 24),
                     new NotNullValidator('Merci de spécifier le pseudo'),
+                    new NicknameDatabaseValidator('Ce pseudo est deja utilisé')
                 ],
             ]))
             ->add(new StringField([
                 'label' => 'Email',
                 'name' => 'email',
                 'validators' => [
-                    new NotNullValidator('Merci de spécifier l\'auteur du commentaire'),
-                    new EmailValidator('Merci de spécifier un email valide.')
+                    new NotNullValidator('Merci de spécifier un email'),
+                    new EmailPatternValidator('Merci de spécifier un email valide.'),
+                    new EmailDatabaseValidator('Cet email est deja utilisé')
                 ],
             ]))
 

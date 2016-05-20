@@ -35,6 +35,10 @@ abstract class Field
         return true;
     }
 
+    public function error(){
+        return $this->errorMessage;
+    }
+
     public function label()
     {
         return $this->label;

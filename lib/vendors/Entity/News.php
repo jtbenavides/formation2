@@ -112,6 +112,6 @@ class News extends Entity implements \JsonSerializable
      */
     function jsonSerialize()
     {
-        return [ 'titre' => '<h2><a href='.Direction::askRoute('Frontend','News','show',['id' => $this->id()]).'>'.$this->titre().'</a>', 'contenu' => '<p>'.$this->contenu().'</p>'];
+        return [ 'titre' => '<h2><a href='.Direction::askRoute('Frontend','News','show',['id' => $this->id()]).'>'.$this->titre().'</a></h2>', 'contenu' => '<p>'.$this->contenu().'</p>'];
   }
 }

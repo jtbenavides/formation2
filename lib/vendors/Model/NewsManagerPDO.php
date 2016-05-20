@@ -214,7 +214,7 @@ class NewsManagerPDO extends NewsManager
 
         $news->setId($this->dao->lastInsertId());
 
-        $listTag = $news->tags();
+        $listTag = array_unique($news->tags());
 
         if(!empty($listTag)):
             foreach($listTag as $tag):
@@ -237,9 +237,9 @@ class NewsManagerPDO extends NewsManager
 
         $requete->execute();
 
-        $listTag = $news->tags();
-
         $this->deleteTagdByNews($news->id());
+
+        $listTag = array_unique($news->tags());
 
         if(!empty($listTag)):
             foreach($listTag as $tag):

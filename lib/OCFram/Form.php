@@ -50,13 +50,16 @@ class Form
     }
 
     public function error(){
+        $errors = [];
         foreach ($this->fields as $field)
         {
             if (!$field->isValid())
             {
-                return $field->label();
+                $errors[$field->name()] = $field->error();
             }
         }
+
+        return $errors;
     }
 
     public function entity()

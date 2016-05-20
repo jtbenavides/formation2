@@ -14,7 +14,7 @@ class PasswordField extends Field
             $widget .= $this->errorMessage.'<br />';
         }
 
-        $widget .= '<label>'.$this->label.'</label><input type="password" name="'.$this->name.'"';
+        $widget .= '<label for="'.$this->name.'">'.$this->label.' :</label><input type="password" id="'.$this->name.'" name="'.$this->name.'"';
 
         if (!empty($this->value))
         {

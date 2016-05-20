@@ -14,11 +14,11 @@ class StringField extends Field
             $widget .= $this->errorMessage.'<br />';
         }
 
-        $widget .= '<label>'.$this->label.'</label><input type="text" autocomplete="off" name="'.$this->name.'"';
+        $widget .= '<label for="'.$this->name.'">'.$this->label.' :</label><input type="text" autocomplete="off" id="'.$this->name.'" name="'.$this->name.'"';
 
         if (!empty($this->value))
         {
-            $widget .= ' value="'.htmlspecialchars($this->value).'"';
+            $widget .= ' value="'.$this->value.'"';
         }
 
         if (!empty($this->maxLength))

@@ -1,7 +1,7 @@
 <?php
 namespace OCFram;
 
-class EmailValidator extends Validator
+class EmailPatternValidator extends Validator
 {
     public function isValid($value)
     {

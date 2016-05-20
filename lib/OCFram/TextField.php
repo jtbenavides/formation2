@@ -15,7 +15,7 @@ class TextField extends Field
             $widget .= $this->errorMessage.'<br />';
         }
 
-        $widget .= '<label>'.$this->label.'</label><textarea name="'.$this->name.'"';
+        $widget .= '<label or="'.$this->name.'">'.$this->label.' :</label><textarea id="'.$this->name.'" name="'.$this->name.'"';
 
         if (!empty($this->cols))
         {
@@ -31,7 +31,7 @@ class TextField extends Field
 
         if (!empty($this->value))
         {
-            $widget .= htmlspecialchars($this->value);
+            $widget .= $this->value;
         }
 
         return $widget.'</textarea>';

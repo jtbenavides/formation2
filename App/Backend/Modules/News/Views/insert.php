@@ -4,6 +4,6 @@
         <?= $form ?>
         <div id="results"></div>
         <br>
-        <input type="submit" value="Ajouter" />
+        <input id="news-add" type="submit" value="Ajouter" />
     </p>
 </form>
